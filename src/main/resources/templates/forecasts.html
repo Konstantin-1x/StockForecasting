@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout('История прогнозов', 'forecasts', ~{::main})}">
+<main>
+    <section class="page-head">
+        <div>
+            <h1>История прогнозов</h1>
+            <p>Результаты расчетов ML-модуля будут отображаться здесь после подключения прогнозного ядра.</p>
+        </div>
+    </section>
+
+    <section class="card table-card">
+        <div class="table-wrap" th:if="${!forecasts.isEmpty()}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Дата расчета</th>
+                    <th>Товар</th>
+                    <th>Стоимость акции</th>
+                    <th>Покупки</th>
+                    <th>Срок распродажи</th>
+                    <th>Уверенность</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="forecast : ${forecasts}">
+                    <td th:text="${forecast.calculatedAtLabel}">Дата</td>
+                    <td>
+                        <span class="strong" th:text="${forecast.product.name}">Товар</span>
+                        <div class="muted" th:text="${forecast.product.marketplaceArticle}">Артикул</div>
+                    </td>
+                    <td th:text="${forecast.promotionCostForecast} + ' ₽'">0 ₽</td>
+                    <td th:text="${forecast.promotionPurchaseForecast}">0</td>
+                    <td th:text="${forecast.selloutDaysForecast} + ' дн.'">0 дн.</td>
+                    <td><span class="badge badge--warn" th:text="${forecast.confidenceInterval} + '%'">0%</span></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="empty" th:if="${forecasts.isEmpty()}">Прогнозы пока не рассчитаны.</div>
+    </section>
+</main>
+</html>

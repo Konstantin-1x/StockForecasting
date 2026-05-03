@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout('Админ-панель', 'admin', ~{::main})}">
+<main>
+    <section class="page-head">
+        <div>
+            <h1>Админ-панель</h1>
+            <p>Административная сводка по продавцам, данным парсинга и прогнозам.</p>
+        </div>
+    </section>
+
+    <section class="grid grid--4">
+        <div class="card metric">
+            <div class="metric__label">Продавцов</div>
+            <div class="metric__value" th:text="${sellerCount}">0</div>
+        </div>
+        <div class="card metric">
+            <div class="metric__label">Товаров</div>
+            <div class="metric__value" th:text="${productCount}">0</div>
+        </div>
+        <div class="card metric">
+            <div class="metric__label">Категорий</div>
+            <div class="metric__value" th:text="${categoryCount}">0</div>
+        </div>
+        <div class="card metric">
+            <div class="metric__label">Прогнозов</div>
+            <div class="metric__value" th:text="${forecastCount}">0</div>
+        </div>
+    </section>
+
+    <section class="card table-card" style="margin-top: 18px;">
+        <div class="table-toolbar">
+            <div>
+                <div class="table-toolbar__title">Журнал последних собранных предложений</div>
+                <div class="table-toolbar__hint">Эта таблица показывает связь интерфейса с PostgreSQL.</div>
+            </div>
+            <span class="badge badge--ok" th:text="${offerCount} + ' записей'">0 записей</span>
+        </div>
+        <div class="table-wrap" th:if="${!latestOffers.isEmpty()}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Категория</th>
+                    <th>Артикул</th>
+                    <th>Товар</th>
+                    <th>Цена</th>
+                    <th>Кешбэк</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="offer : ${latestOffers}">
+                    <td th:text="${offer.collectedAtLabel}">Дата</td>
+                    <td th:text="${offer.category.name}">Категория</td>
+                    <td class="strong" th:text="${offer.marketplaceArticle}">0</td>
+                    <td th:text="${offer.productName}">Товар</td>
+                    <td th:text="${offer.competitorPrice} + ' ₽'">0 ₽</td>
+                    <td th:text="${offer.feedbackReward} + ' ₽'">0 ₽</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="empty" th:if="${latestOffers.isEmpty()}">Журнал пуст.</div>
+    </section>
+</main>
+</html>

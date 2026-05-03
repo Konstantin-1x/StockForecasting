@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: StockForecasting
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/stockforecasting}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:admin}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: ${SERVER_PORT:8080}
+
+wb:
+  parser:
+    promotions-url: ${WB_PROMOTIONS_URL:https://static-basket-01.wbbasket.ru/vol0/data/promotions/rubli-za-otzyvy-v3.json}
+    cookie-file: ${WB_COOKIE_FILE:cookie.txt}
+    max-categories: ${WB_MAX_CATEGORIES:3}
+    max-pages-per-category: ${WB_MAX_PAGES_PER_CATEGORY:1}
+    request-timeout: ${WB_REQUEST_TIMEOUT:20s}
+    request-delay: ${WB_REQUEST_DELAY:400ms}

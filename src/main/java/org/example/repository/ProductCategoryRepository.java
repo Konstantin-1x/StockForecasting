@@ -1,0 +1,11 @@
+package org.example.repository;
+
+import org.example.domain.ProductCategory;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface ProductCategoryRepository extends JpaRepository<ProductCategory, Long> {
+
+    Optional<ProductCategory> findByExternalUrl(String externalUrl);
+}

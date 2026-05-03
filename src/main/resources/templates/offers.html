@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout('Конкурентные предложения', 'offers', ~{::main})}">
+<main>
+    <section class="page-head">
+        <div>
+            <h1>Конкурентные предложения</h1>
+            <p>Сохраненные результаты парсинга акции «Рубли за отзывы» с ценой, кешбэком и остатками.</p>
+        </div>
+        <form class="form-inline" th:action="@{/parser/import}" method="post">
+            <input class="input" type="number" name="maxCategories" min="1" max="500" value="3">
+            <input class="input" type="number" name="maxPagesPerCategory" min="1" max="100" value="1">
+            <button class="btn" type="submit">Обновить данные</button>
+        </form>
+    </section>
+
+    <section class="card table-card">
+        <div class="table-toolbar">
+            <div>
+                <div class="table-toolbar__title">Предложения Wildberries</div>
+                <div class="table-toolbar__hint">Показаны последние 100 записей из PostgreSQL.</div>
+            </div>
+        </div>
+        <div class="table-wrap" th:if="${!offers.isEmpty()}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Категория</th>
+                    <th>Артикул</th>
+                    <th>Наименование</th>
+                    <th>Продавец</th>
+                    <th>Цена</th>
+                    <th>Кешбэк</th>
+                    <th>Выгода</th>
+                    <th>Остаток</th>
+                    <th>Сбор</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="offer : ${offers}">
+                    <td th:text="${offer.category.name}">Категория</td>
+                    <td class="strong">
+                        <a th:href="${offer.cardUrl}" target="_blank" th:text="${offer.marketplaceArticle}">0</a>
+                    </td>
+                    <td th:text="${offer.productName}">Товар</td>
+                    <td th:text="${offer.competitorName ?: 'Не указан'}">Продавец</td>
+                    <td th:text="${offer.competitorPrice} + ' ₽'">0 ₽</td>
+                    <td th:text="${offer.feedbackReward} + ' ₽'">0 ₽</td>
+                    <td><span class="badge badge--ok" th:text="${offer.benefitPercent} + '%'">0%</span></td>
+                    <td th:text="${offer.stockQuantity}">0</td>
+                    <td class="muted" th:text="${offer.collectedAtLabel}">Дата</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="empty" th:if="${offers.isEmpty()}">Таблица пуста. Сейчас каталог WB возвращает 498, поэтому импорт не запускался успешно.</div>
+    </section>
+</main>
+</html>

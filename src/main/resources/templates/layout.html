@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(title, active, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' - Промо Прогноз'">Промо Прогноз</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<div class="shell">
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand__title">Промо Прогноз</div>
+            <div class="brand__subtitle">Spring Boot + PostgreSQL</div>
+        </div>
+
+        <nav class="nav">
+            <a th:href="@{/}" class="nav__link" th:classappend="${active == 'dashboard'} ? ' nav__link--active'">Панель</a>
+            <a th:href="@{/offers}" class="nav__link" th:classappend="${active == 'offers'} ? ' nav__link--active'">Конкурентные предложения</a>
+            <a th:href="@{/products}" class="nav__link" th:classappend="${active == 'products'} ? ' nav__link--active'">Товары продавцов</a>
+            <a th:href="@{/forecasts}" class="nav__link" th:classappend="${active == 'forecasts'} ? ' nav__link--active'">История прогнозов</a>
+            <a th:href="@{/admin}" class="nav__link" th:classappend="${active == 'admin'} ? ' nav__link--active'">Админ-панель</a>
+        </nav>
+
+        <div class="sidebar__footer">2026 Промо Прогноз</div>
+    </aside>
+
+    <div class="content">
+        <header class="topbar">
+            <div class="topbar__inner">
+                <div class="topbar__title" th:text="${title}">Панель</div>
+                <a class="btn btn--soft" th:href="@{/api/parser/wildberries/diagnostics}">Диагностика</a>
+            </div>
+        </header>
+
+        <main class="page">
+            <div th:if="${status}" class="alert alert--ok" th:text="${status}"></div>
+            <div th:if="${error}" class="alert alert--bad" th:text="${error}"></div>
+            <th:block th:replace="${content}"></th:block>
+        </main>
+    </div>
+</div>
+</body>
+</html>
