@@ -203,6 +203,121 @@ a {
     overflow-x: auto;
 }
 
+.offers-workspace {
+    display: grid;
+    grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
+    align-items: start;
+    gap: 18px;
+}
+
+.catalog-panel {
+    position: sticky;
+    top: 82px;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 96px);
+    overflow: visible;
+    z-index: 30;
+}
+
+.catalog-panel__head {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 14px 12px;
+    border-bottom: 1px solid var(--line);
+}
+
+.catalog-panel__title {
+    font-weight: 760;
+}
+
+.catalog-reset {
+    border-radius: 6px;
+    padding: 6px 8px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.catalog-reset:hover,
+.catalog-reset--active {
+    background: #eef4ff;
+    color: var(--brand);
+}
+
+.catalog-menu {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: calc(100vh - 154px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 8px;
+    scrollbar-gutter: stable;
+}
+
+.catalog-root {
+    position: relative;
+}
+
+.catalog-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 32px;
+    border-radius: 7px;
+    padding: 7px 8px;
+    color: #1f2937;
+    font-size: 13px;
+    line-height: 1.25;
+}
+
+.catalog-link:hover,
+.catalog-link--active {
+    background: #f2f4f8;
+    color: #111827;
+}
+
+.catalog-link--child {
+    justify-content: flex-start;
+    padding-left: calc(8px + var(--depth, 0) * 14px);
+}
+
+.catalog-link__arrow {
+    color: var(--muted);
+    font-size: 20px;
+    line-height: 1;
+}
+
+.catalog-flyout {
+    position: fixed;
+    z-index: 60;
+    top: 82px;
+    left: 0;
+    display: none;
+    width: 330px;
+    max-height: calc(100vh - 120px);
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px;
+    background: #ffffff;
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.14);
+}
+
+.catalog-root--open .catalog-flyout {
+    display: block;
+}
+
+.offers-table-card {
+    min-width: 0;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -266,6 +381,13 @@ tr:hover td {
 
 .btn--soft:hover {
     background: #f8fafc;
+}
+
+.btn--sm {
+    min-height: 30px;
+    border-radius: 6px;
+    padding: 0 10px;
+    font-size: 12px;
 }
 
 .form-inline {
@@ -332,6 +454,58 @@ tr:hover td {
     color: var(--muted);
 }
 
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-top: 1px solid var(--line);
+}
+
+.pagination__pages {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.pagination__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    min-width: 32px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 0 11px;
+    background: #ffffff;
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.pagination__link:hover {
+    background: #f8fafc;
+}
+
+.pagination__link--disabled {
+    color: #a3acba;
+    cursor: default;
+}
+
+.pagination__link--current {
+    border-color: #d5dbe7;
+    background: #eef2f7;
+    color: #475569;
+    cursor: default;
+}
+
+.pagination__state {
+    color: var(--muted);
+    font-size: 13px;
+}
+
 @media (max-width: 920px) {
     .shell {
         display: block;
@@ -346,6 +520,30 @@ tr:hover td {
     .grid--3,
     .grid--4 {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .offers-workspace {
+        grid-template-columns: 1fr;
+    }
+
+    .catalog-panel {
+        position: static;
+        max-height: none;
+    }
+
+    .catalog-menu {
+        max-height: none;
+        min-height: 0;
+        overflow: visible;
+    }
+
+    .catalog-flyout {
+        position: static;
+        display: block;
+        width: auto;
+        max-height: none;
+        margin: 6px 0 8px 12px;
+        box-shadow: none;
     }
 }
 
@@ -365,5 +563,14 @@ tr:hover td {
     .grid--3,
     .grid--4 {
         grid-template-columns: 1fr;
+    }
+
+    .pagination {
+        align-items: stretch;
+        flex-wrap: wrap;
+    }
+
+    .pagination__pages {
+        flex-wrap: wrap;
     }
 }

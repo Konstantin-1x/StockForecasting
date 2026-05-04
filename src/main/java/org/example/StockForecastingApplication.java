@@ -10,7 +10,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @EnableConfigurationProperties(WildberriesParserProperties.class)
 public class StockForecastingApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(StockForecastingApplication.class, args);
     }

@@ -79,4 +79,44 @@ class WildberriesResponseParserTest {
         assertThat(product.feedbackReward()).isEqualByComparingTo(new BigDecimal("450"));
         assertThat(product.benefitPercent()).isEqualByComparingTo(new BigDecimal("30.0000"));
     }
+
+    @Test
+    void parsesProductDetailSnapshotData() throws IOException {
+        String json = """
+                {
+                  "data": {
+                    "products": [
+                      {
+                        "id": 143539126,
+                        "name": "Tracked product",
+                        "supplier": "Tracked Store",
+                        "supplierId": 77,
+                        "feedbackPoints": "300",
+                        "reviewRating": "4.8",
+                        "feedbacks": "42",
+                        "sizes": [
+                          {
+                            "price": {"product": 120000},
+                            "stocks": [
+                              {"qty": 4},
+                              {"qty": 6}
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+                """;
+
+        WildberriesProductDetails details = parser.parseProductDetail(json, "143539126");
+
+        assertThat(details.article()).isEqualTo("143539126");
+        assertThat(details.price()).isEqualByComparingTo(new BigDecimal("1200"));
+        assertThat(details.feedbackReward()).isEqualByComparingTo(new BigDecimal("300"));
+        assertThat(details.benefitPercent()).isEqualByComparingTo(new BigDecimal("25.0000"));
+        assertThat(details.stockQuantity()).isEqualTo(10);
+        assertThat(details.rating()).isEqualByComparingTo(new BigDecimal("4.8"));
+        assertThat(details.reviewsCount()).isEqualTo(42);
+    }
 }

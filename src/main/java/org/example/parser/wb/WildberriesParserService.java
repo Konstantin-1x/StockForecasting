@@ -54,7 +54,10 @@ public class WildberriesParserService {
             int productsParsed = 0;
             int offersSaved = 0;
 
-            for (WildberriesCategoryRef categoryRef : categories.stream().limit(maxCategories).toList()) {
+            for (WildberriesCategoryRef categoryRef : categories.stream()
+                    .filter(WildberriesCategoryRef::scannable)
+                    .limit(maxCategories)
+                    .toList()) {
                 log.info("Processing WB category: {} ({})", categoryRef.name(), categoryRef.categoryUrl());
                 ProductCategory category = saveCategory(categoryRef);
                 int pagesToRead = maxPagesPerCategory;
@@ -116,6 +119,10 @@ public class WildberriesParserService {
         category.setExternalUrl(categoryRef.categoryUrl());
         category.setWbShardKey(categoryRef.shardKey());
         category.setWbQuery(categoryRef.query());
+        if (categoryRef.parentCategoryUrl() != null && !categoryRef.parentCategoryUrl().equals(categoryRef.categoryUrl())) {
+            categoryRepository.findByExternalUrl(categoryRef.parentCategoryUrl())
+                    .ifPresent(category::setParentCategory);
+        }
         return categoryRepository.save(category);
     }
 

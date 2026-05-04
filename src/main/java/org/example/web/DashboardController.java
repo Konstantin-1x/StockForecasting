@@ -1,5 +1,6 @@
 package org.example.web;
 
+import org.example.domain.CompetitorOffer;
 import org.example.parser.wb.WildberriesImportResult;
 import org.example.parser.wb.WildberriesParserService;
 import org.example.repository.CompetitorOfferRepository;
@@ -8,6 +9,7 @@ import org.example.repository.ProductRepository;
 import org.example.repository.PromotionForecastRepository;
 import org.example.repository.PromotionRepository;
 import org.example.repository.SellerRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
@@ -16,6 +18,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
+import java.util.stream.IntStream;
 
 @Controller
 public class DashboardController {
@@ -27,6 +32,7 @@ public class DashboardController {
     private final PromotionForecastRepository forecastRepository;
     private final CompetitorOfferRepository offerRepository;
     private final WildberriesParserService parserService;
+    private final CategoryCatalogService categoryCatalogService;
 
     public DashboardController(SellerRepository sellerRepository,
                                ProductRepository productRepository,
@@ -34,7 +40,8 @@ public class DashboardController {
                                PromotionRepository promotionRepository,
                                PromotionForecastRepository forecastRepository,
                                CompetitorOfferRepository offerRepository,
-                               WildberriesParserService parserService) {
+                               WildberriesParserService parserService,
+                               CategoryCatalogService categoryCatalogService) {
         this.sellerRepository = sellerRepository;
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
@@ -42,6 +49,7 @@ public class DashboardController {
         this.forecastRepository = forecastRepository;
         this.offerRepository = offerRepository;
         this.parserService = parserService;
+        this.categoryCatalogService = categoryCatalogService;
     }
 
     @GetMapping("/")
@@ -59,10 +67,29 @@ public class DashboardController {
     }
 
     @GetMapping("/offers")
-    public String offers(Model model) {
-        model.addAttribute("offers", offerRepository.findAll(
-                PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "collectedAt"))
-        ));
+    public String offers(@RequestParam(required = false) String categoryKey,
+                         @RequestParam(defaultValue = "0") Integer page,
+                         Model model) {
+        int currentPage = Math.max(0, page == null ? 0 : page);
+        PageRequest pageRequest = PageRequest.of(
+                currentPage,
+                100,
+                Sort.by(Sort.Direction.DESC, "collectedAt")
+        );
+
+        Page<CompetitorOffer> offerPage;
+        String categoryUrlPrefix = categoryCatalogService.selectedCategoryUrlPrefix(categoryKey);
+        if (categoryUrlPrefix == null) {
+            offerPage = offerRepository.findAll(pageRequest);
+        } else {
+            offerPage = offerRepository.findByCategoryUrlPrefix(categoryUrlPrefix, pageRequest);
+        }
+
+        model.addAttribute("catalog", categoryCatalogService.buildCatalog(categoryUrlPrefix));
+        model.addAttribute("selectedCategoryKey", categoryUrlPrefix);
+        model.addAttribute("offerPage", offerPage);
+        model.addAttribute("offers", offerPage.getContent());
+        model.addAttribute("paginationPages", pageNumbers(offerPage));
         return "offers";
     }
 
@@ -104,5 +131,19 @@ public class DashboardController {
             redirectAttributes.addFlashAttribute("error", "Импорт не выполнен: " + e.getMessage());
         }
         return "redirect:/offers";
+    }
+
+    private static List<Integer> pageNumbers(Page<?> page) {
+        int totalPages = page.getTotalPages();
+        if (totalPages <= 1) {
+            return List.of();
+        }
+
+        int current = page.getNumber();
+        int start = Math.max(0, current - 2);
+        int end = Math.min(totalPages - 1, current + 2);
+        return IntStream.rangeClosed(start, end)
+                .boxed()
+                .toList();
     }
 }

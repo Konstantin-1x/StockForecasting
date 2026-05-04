@@ -8,13 +8,15 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Map;
 
 @Component
 public class WildberriesHttpClient {
 
     private static final Logger log = LoggerFactory.getLogger(WildberriesHttpClient.class);
-    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:148.0) Gecko/20100101 Firefox/148.0";
     private static final int MAX_LOGGED_URL_LENGTH = 180;
 
     private final WildberriesParserProperties properties;
@@ -28,7 +30,7 @@ public class WildberriesHttpClient {
     public String getJson(String url, String referer) throws IOException {
         Duration timeout = properties.getRequestTimeout();
         Connection connection = Jsoup.connect(url)
-                .userAgent(USER_AGENT)
+                .userAgent(properties.getUserAgent())
                 .header("Accept", "*/*")
                 .header("Accept-Language", "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7")
                 .header("Origin", "https://www.wildberries.ru")
@@ -37,13 +39,15 @@ public class WildberriesHttpClient {
                 .header("Sec-Fetch-Mode", "cors")
                 .header("Sec-Fetch-Site", "same-origin")
                 .header("x-requested-with", "XMLHttpRequest")
-                .header("x-spa-version", "14.0.7")
+                .header("x-spa-version", properties.getSpaVersion())
                 .method(Connection.Method.GET)
                 .ignoreContentType(true)
+                .ignoreHttpErrors(true)
                 .timeout(Math.toIntExact(timeout.toMillis()))
                 .followRedirects(true)
                 .maxBodySize(0);
 
+        addOptionalHeader(connection, "deviceid", properties.getDeviceId());
         addCookies(connection, cookieRotator.nextHeader());
 
         Connection.Response response = connection.execute();
@@ -51,7 +55,7 @@ public class WildberriesHttpClient {
         String body = response.body();
         if (statusCode < 200 || statusCode >= 300) {
             log.warn("WB GET {} -> HTTP {}", compactUrl(url), statusCode);
-            throw new IOException("Wildberries returned HTTP " + statusCode + " for " + url);
+            throw new WildberriesHttpStatusException(statusCode, url, retryAfter(response));
         }
         log.info("WB GET {} -> HTTP {} ({} chars)", compactUrl(url), statusCode, body == null ? 0 : body.length());
         if (body == null || body.isBlank()) {
@@ -62,6 +66,12 @@ public class WildberriesHttpClient {
             throw new IOException("Wildberries returned non-JSON body for " + url);
         }
         return body;
+    }
+
+    private static void addOptionalHeader(Connection connection, String name, String value) {
+        if (value != null && !value.isBlank()) {
+            connection.header(name, value);
+        }
     }
 
     private static void addCookies(Connection connection, String cookieHeader) {
@@ -85,6 +95,27 @@ public class WildberriesHttpClient {
             return url;
         }
         return url.substring(0, MAX_LOGGED_URL_LENGTH - 3) + "...";
+    }
+
+    private static Duration retryAfter(Connection.Response response) {
+        String value = response.header("Retry-After");
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        String trimmed = value.trim();
+        try {
+            long seconds = Long.parseLong(trimmed);
+            return Duration.ofSeconds(Math.max(0, seconds));
+        } catch (NumberFormatException ignored) {
+            // Retry-After can also be an HTTP date.
+        }
+        try {
+            ZonedDateTime retryAt = ZonedDateTime.parse(trimmed, DateTimeFormatter.RFC_1123_DATE_TIME);
+            Duration duration = Duration.between(ZonedDateTime.now(retryAt.getZone()), retryAt);
+            return duration.isNegative() ? Duration.ZERO : duration;
+        } catch (DateTimeParseException ignored) {
+            return null;
+        }
     }
 
     Map<String, Object> diagnostics() {

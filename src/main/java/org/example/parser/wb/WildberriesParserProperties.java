@@ -10,10 +10,24 @@ public class WildberriesParserProperties {
 
     private String promotionsUrl = "https://static-basket-01.wbbasket.ru/vol0/data/promotions/rubli-za-otzyvy-v3.json";
     private Path cookieFile = Path.of("cookies.txt");
-    private int maxCategories = 3;
-    private int maxPagesPerCategory = 1;
+    private int maxCategories = 0;
+    private int maxPagesPerCategory = 0;
     private Duration requestTimeout = Duration.ofSeconds(20);
     private Duration requestDelay = Duration.ofMillis(400);
+    private String userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0";
+    private String spaVersion = "14.8.1";
+    private String deviceId = "";
+    private boolean continuousScanEnabled = true;
+    private boolean monitoringEnabled = true;
+    private boolean baselineOnStartup = true;
+    private int scanParallelism = 150;
+    private int monitorBatchSize = 150;
+    private long scanInitialDelayMs = 900_000;
+    private long scanFixedDelayMs = 900_000;
+    private long monitorInitialDelayMs = 30_000;
+    private long monitorFixedDelayMs = 60_000;
+    private Duration productMeasurementDelay = Duration.ofHours(1);
+    private Duration productRateLimitRetryDelay = Duration.ofMinutes(1);
 
     public String getPromotionsUrl() {
         return promotionsUrl;
@@ -61,5 +75,117 @@ public class WildberriesParserProperties {
 
     public void setRequestDelay(Duration requestDelay) {
         this.requestDelay = requestDelay;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+
+    public String getSpaVersion() {
+        return spaVersion;
+    }
+
+    public void setSpaVersion(String spaVersion) {
+        this.spaVersion = spaVersion;
+    }
+
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
+    }
+
+    public boolean isContinuousScanEnabled() {
+        return continuousScanEnabled;
+    }
+
+    public void setContinuousScanEnabled(boolean continuousScanEnabled) {
+        this.continuousScanEnabled = continuousScanEnabled;
+    }
+
+    public boolean isMonitoringEnabled() {
+        return monitoringEnabled;
+    }
+
+    public void setMonitoringEnabled(boolean monitoringEnabled) {
+        this.monitoringEnabled = monitoringEnabled;
+    }
+
+    public boolean isBaselineOnStartup() {
+        return baselineOnStartup;
+    }
+
+    public void setBaselineOnStartup(boolean baselineOnStartup) {
+        this.baselineOnStartup = baselineOnStartup;
+    }
+
+    public int getScanParallelism() {
+        return scanParallelism;
+    }
+
+    public void setScanParallelism(int scanParallelism) {
+        this.scanParallelism = scanParallelism;
+    }
+
+    public int getMonitorBatchSize() {
+        return monitorBatchSize;
+    }
+
+    public void setMonitorBatchSize(int monitorBatchSize) {
+        this.monitorBatchSize = monitorBatchSize;
+    }
+
+    public long getScanInitialDelayMs() {
+        return scanInitialDelayMs;
+    }
+
+    public void setScanInitialDelayMs(long scanInitialDelayMs) {
+        this.scanInitialDelayMs = scanInitialDelayMs;
+    }
+
+    public long getScanFixedDelayMs() {
+        return scanFixedDelayMs;
+    }
+
+    public void setScanFixedDelayMs(long scanFixedDelayMs) {
+        this.scanFixedDelayMs = scanFixedDelayMs;
+    }
+
+    public long getMonitorInitialDelayMs() {
+        return monitorInitialDelayMs;
+    }
+
+    public void setMonitorInitialDelayMs(long monitorInitialDelayMs) {
+        this.monitorInitialDelayMs = monitorInitialDelayMs;
+    }
+
+    public long getMonitorFixedDelayMs() {
+        return monitorFixedDelayMs;
+    }
+
+    public void setMonitorFixedDelayMs(long monitorFixedDelayMs) {
+        this.monitorFixedDelayMs = monitorFixedDelayMs;
+    }
+
+    public Duration getProductMeasurementDelay() {
+        return productMeasurementDelay;
+    }
+
+    public void setProductMeasurementDelay(Duration productMeasurementDelay) {
+        this.productMeasurementDelay = productMeasurementDelay;
+    }
+
+    public Duration getProductRateLimitRetryDelay() {
+        return productRateLimitRetryDelay;
+    }
+
+    public void setProductRateLimitRetryDelay(Duration productRateLimitRetryDelay) {
+        this.productRateLimitRetryDelay = productRateLimitRetryDelay;
     }
 }

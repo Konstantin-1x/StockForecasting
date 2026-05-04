@@ -36,7 +36,7 @@ public class WildberriesResponseParser {
                 JsonNode childNodes = menuNode.path("childNodes");
                 if (childNodes.isArray()) {
                     for (JsonNode categoryNode : childNodes) {
-                        collectCategory(categoryNode, action, result);
+                        collectCategory(categoryNode, action, null, result);
                     }
                 }
             }
@@ -59,37 +59,82 @@ public class WildberriesResponseParser {
         return new WildberriesPage(total, products);
     }
 
-    private void collectCategory(JsonNode node, String action, Map<String, WildberriesCategoryRef> result) {
-        addCategoryIfValid(node, action, result);
+    public WildberriesProductDetails parseProductDetail(String json, String expectedArticle) throws IOException {
+        JsonNode root = objectMapper.readTree(json);
+        JsonNode productsNode = findProductsNode(root);
+        if (!productsNode.isArray() || productsNode.isEmpty()) {
+            throw new IOException("Product detail response does not contain products");
+        }
+
+        JsonNode productNode = productsNode.get(0);
+        if (expectedArticle != null && !expectedArticle.isBlank()) {
+            for (JsonNode candidate : productsNode) {
+                if (expectedArticle.equals(text(candidate, "id"))) {
+                    productNode = candidate;
+                    break;
+                }
+            }
+        }
+
+        String article = defaultText(text(productNode, "id"), expectedArticle);
+        if (article == null || article.isBlank()) {
+            throw new IOException("Product article was not found in detail response");
+        }
+
+        return new WildberriesProductDetails(
+                article,
+                defaultText(text(productNode, "name"), "Unknown product"),
+                text(productNode, "supplier"),
+                longValue(productNode, "supplierId"),
+                firstProductPrice(productNode),
+                feedbackReward(productNode),
+                totalStock(productNode),
+                decimal(productNode, "reviewRating"),
+                integer(productNode, "feedbacks"),
+                WildberriesProductDetailUrlBuilder.cardUrl(article),
+                WildberriesProductDetailUrlBuilder.build(article),
+                json
+        );
+    }
+
+    private void collectCategory(JsonNode node,
+                                 String action,
+                                 String parentCategoryUrl,
+                                 Map<String, WildberriesCategoryRef> result) {
+        String categoryUrl = addCategoryIfValid(node, action, parentCategoryUrl, result);
         JsonNode childNodes = node.path("childNodes");
         if (childNodes.isArray()) {
             for (JsonNode child : childNodes) {
-                collectCategory(child, action, result);
+                collectCategory(child, action, categoryUrl == null ? parentCategoryUrl : categoryUrl, result);
             }
         }
     }
 
-    private void addCategoryIfValid(JsonNode node, String action, Map<String, WildberriesCategoryRef> result) {
+    private String addCategoryIfValid(JsonNode node,
+                                      String action,
+                                      String parentCategoryUrl,
+                                      Map<String, WildberriesCategoryRef> result) {
         String url = text(node, "url");
-        String shardKey = text(node, "shardKey");
-        if (url == null || url.isBlank() || shardKey == null || shardKey.isBlank()) {
-            return;
-        }
-        if ("blackhole".equals(shardKey)
+        if (url == null || url.isBlank()
                 || url.startsWith("https://vmeste.wildberries.ru")
                 || url.startsWith("https://travel.wildberries.ru")
                 || url.startsWith("https://digital.wildberries.ru")) {
-            return;
+            return null;
         }
 
+        String shardKey = text(node, "shardKey");
         String categoryUrl = ensureWildberriesUrl(url);
+        boolean scannable = shardKey != null && !shardKey.isBlank() && !"blackhole".equals(shardKey);
         result.putIfAbsent(categoryUrl, new WildberriesCategoryRef(
                 defaultText(text(node, "name"), categoryUrl),
                 categoryUrl,
                 shardKey,
                 sanitizeQuery(text(node, "query")),
-                action
+                action,
+                parentCategoryUrl,
+                scannable
         ));
+        return categoryUrl;
     }
 
     private static String ensureWildberriesUrl(String url) {
@@ -138,13 +183,7 @@ public class WildberriesResponseParser {
 
     private static java.util.Optional<WildberriesParsedProduct> parseProduct(JsonNode productNode) {
         String article = text(productNode, "id");
-        BigDecimal feedbackReward = decimal(productNode, "feedbackPoints");
-        if (feedbackReward == null) {
-            feedbackReward = decimal(productNode, "nmFeedbacks");
-        }
-        if (feedbackReward == null) {
-            feedbackReward = decimal(productNode, "feedbacks");
-        }
+        BigDecimal feedbackReward = feedbackReward(productNode);
         Integer stock = integer(productNode, "totalQuantity");
         BigDecimal price = firstProductPrice(productNode);
 
@@ -179,6 +218,45 @@ public class WildberriesResponseParser {
             }
         }
         return null;
+    }
+
+    private static BigDecimal feedbackReward(JsonNode productNode) {
+        BigDecimal feedbackReward = decimal(productNode, "feedbackPoints");
+        if (feedbackReward == null) {
+            feedbackReward = decimal(productNode, "nmFeedbacks");
+        }
+        if (feedbackReward == null) {
+            feedbackReward = decimal(productNode, "feedbacks");
+        }
+        return feedbackReward;
+    }
+
+    private static Integer totalStock(JsonNode productNode) {
+        JsonNode sizes = productNode.path("sizes");
+        int total = 0;
+        boolean hasStockNodes = false;
+        if (sizes.isArray()) {
+            for (JsonNode size : sizes) {
+                JsonNode stocks = size.path("stocks");
+                if (!stocks.isArray()) {
+                    continue;
+                }
+                for (JsonNode stock : stocks) {
+                    Integer quantity = integer(stock, "qty");
+                    if (quantity != null) {
+                        total += quantity;
+                        hasStockNodes = true;
+                    }
+                }
+            }
+        }
+
+        if (hasStockNodes) {
+            return total;
+        }
+
+        Integer totalQuantity = integer(productNode, "totalQuantity");
+        return totalQuantity == null ? 0 : totalQuantity;
     }
 
     private static String text(JsonNode node, String field) {
