@@ -6,6 +6,7 @@ import org.example.domain.TrackedMarketplaceProduct;
 import org.example.repository.MarketplaceMonitoringJobRepository;
 import org.example.repository.MarketplaceProductSnapshotRepository;
 import org.example.repository.TrackedMarketplaceProductRepository;
+import org.example.web.data.DataTransferState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -32,6 +33,7 @@ public class WildberriesProductMonitoringService {
     private final MarketplaceProductSnapshotRepository snapshotRepository;
     private final TrackedMarketplaceProductRepository trackedProductRepository;
     private final ExecutorService wildberriesParserExecutor;
+    private final DataTransferState transferState;
     private final Set<Long> runningJobs = ConcurrentHashMap.newKeySet();
 
     public WildberriesProductMonitoringService(WildberriesParserProperties properties,
@@ -40,6 +42,7 @@ public class WildberriesProductMonitoringService {
                                                MarketplaceMonitoringJobRepository monitoringJobRepository,
                                                MarketplaceProductSnapshotRepository snapshotRepository,
                                                TrackedMarketplaceProductRepository trackedProductRepository,
+                                               DataTransferState transferState,
                                                ExecutorService wildberriesParserExecutor) {
         this.properties = properties;
         this.httpClient = httpClient;
@@ -47,6 +50,7 @@ public class WildberriesProductMonitoringService {
         this.monitoringJobRepository = monitoringJobRepository;
         this.snapshotRepository = snapshotRepository;
         this.trackedProductRepository = trackedProductRepository;
+        this.transferState = transferState;
         this.wildberriesParserExecutor = wildberriesParserExecutor;
     }
 
@@ -58,10 +62,18 @@ public class WildberriesProductMonitoringService {
         if (!properties.isMonitoringEnabled()) {
             return;
         }
+        if (transferState.isTransferInProgress()) {
+            log.info("Wildberries monitoring run skipped: data transfer is running");
+            return;
+        }
         runDueJobs();
     }
 
     public WildberriesMonitoringRunResult runDueJobs() {
+        if (transferState.isTransferInProgress()) {
+            log.info("Wildberries monitoring run skipped: data transfer is running");
+            return new WildberriesMonitoringRunResult(0, 0, runningJobs.size());
+        }
         Instant now = Instant.now();
         int limit = Math.max(1, properties.getMonitorBatchSize());
         List<MarketplaceMonitoringJob> dueJobs = monitoringJobRepository.findDueJobs(
@@ -123,11 +135,13 @@ public class WildberriesProductMonitoringService {
         snapshot.setBenefitPercent(details.benefitPercent());
         snapshot.setRating(details.rating());
         snapshot.setReviewsCount(details.reviewsCount());
+        snapshot.setMeasurementSource("PRODUCT_DETAIL");
         snapshot.setRawJson(details.rawJson());
         snapshotRepository.save(snapshot);
 
         product.setProductName(details.name());
         product.setSellerName(details.supplier());
+        product.setSupplierId(details.supplierId());
         product.setDetailUrl(detailUrl);
 
         job.setLastRunAt(collectedAt);

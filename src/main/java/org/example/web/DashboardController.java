@@ -9,6 +9,7 @@ import org.example.repository.ProductRepository;
 import org.example.repository.PromotionForecastRepository;
 import org.example.repository.PromotionRepository;
 import org.example.repository.SellerRepository;
+import org.example.web.data.ForecastDataQualityService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -33,6 +34,7 @@ public class DashboardController {
     private final CompetitorOfferRepository offerRepository;
     private final WildberriesParserService parserService;
     private final CategoryCatalogService categoryCatalogService;
+    private final ForecastDataQualityService forecastDataQualityService;
 
     public DashboardController(SellerRepository sellerRepository,
                                ProductRepository productRepository,
@@ -41,7 +43,8 @@ public class DashboardController {
                                PromotionForecastRepository forecastRepository,
                                CompetitorOfferRepository offerRepository,
                                WildberriesParserService parserService,
-                               CategoryCatalogService categoryCatalogService) {
+                               CategoryCatalogService categoryCatalogService,
+                               ForecastDataQualityService forecastDataQualityService) {
         this.sellerRepository = sellerRepository;
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
@@ -50,6 +53,7 @@ public class DashboardController {
         this.offerRepository = offerRepository;
         this.parserService = parserService;
         this.categoryCatalogService = categoryCatalogService;
+        this.forecastDataQualityService = forecastDataQualityService;
     }
 
     @GetMapping("/")
@@ -115,6 +119,7 @@ public class DashboardController {
         model.addAttribute("latestOffers", offerRepository.findAll(
                 PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "collectedAt"))
         ));
+        model.addAttribute("qualityReport", forecastDataQualityService.buildReport());
         return "admin";
     }
 

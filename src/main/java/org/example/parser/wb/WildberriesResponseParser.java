@@ -181,7 +181,7 @@ public class WildberriesResponseParser {
         return fallback;
     }
 
-    private static java.util.Optional<WildberriesParsedProduct> parseProduct(JsonNode productNode) {
+    private java.util.Optional<WildberriesParsedProduct> parseProduct(JsonNode productNode) {
         String article = text(productNode, "id");
         BigDecimal feedbackReward = feedbackReward(productNode);
         Integer stock = integer(productNode, "totalQuantity");
@@ -202,8 +202,19 @@ public class WildberriesResponseParser {
                 price,
                 feedbackReward,
                 stock,
-                "https://www.wildberries.ru/catalog/" + article + "/detail.aspx"
+                decimal(productNode, "reviewRating"),
+                integer(productNode, "feedbacks"),
+                "https://www.wildberries.ru/catalog/" + article + "/detail.aspx",
+                productRawJson(productNode)
         ));
+    }
+
+    private String productRawJson(JsonNode productNode) {
+        try {
+            return objectMapper.writeValueAsString(productNode);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     private static BigDecimal firstProductPrice(JsonNode productNode) {

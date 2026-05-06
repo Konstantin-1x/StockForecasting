@@ -28,6 +28,58 @@
         </div>
     </section>
 
+    <section class="grid grid--2 admin-grid">
+        <div class="card action-card">
+            <div class="action-card__head">
+                <div>
+                    <h2>Перенос данных</h2>
+                    <p>Скачивание и загрузка архива через веб-интерфейс без ручных скриптов.</p>
+                </div>
+                <span class="badge badge--ok">ZIP + JSONL</span>
+            </div>
+
+            <div class="action-card__actions">
+                <a class="btn" th:href="@{/admin/data/export}">Скачать экспорт</a>
+            </div>
+
+            <form class="import-form" th:action="@{/admin/data/import}" method="post" enctype="multipart/form-data">
+                <label class="field-label" for="dataArchive">Архив экспорта</label>
+                <input class="file-input" id="dataArchive" type="file" name="file" accept=".zip,application/zip" required>
+
+                <label class="checkbox-line">
+                    <input type="checkbox" name="confirmReplace" value="true" required>
+                    <span>Я понимаю, что импорт полностью заменит локальные данные данными из архива.</span>
+                </label>
+
+                <button class="btn btn--soft" type="submit">Загрузить импорт</button>
+            </form>
+        </div>
+
+        <div class="card action-card">
+            <div class="action-card__head">
+                <div>
+                    <h2>Проверка перед прогнозированием</h2>
+                    <p>Контроль структуры, целостности, пропусков и аномалий временного ряда.</p>
+                </div>
+                <span class="badge"
+                      th:classappend="${qualityReport.hasCriticalIssues()} ? ' badge--warn' : ' badge--ok'"
+                      th:text="${qualityReport.hasCriticalIssues()} ? 'Есть риски' : 'Готово'">Готово</span>
+            </div>
+
+            <div class="quality-list">
+                <div class="quality-check"
+                     th:each="check : ${qualityReport.checks}"
+                     th:classappend="${check.status == 'OK'} ? ' quality-check--ok' : (${check.status == 'WARN'} ? ' quality-check--warn' : ' quality-check--bad')">
+                    <div>
+                        <div class="quality-check__title" th:text="${check.title}">Проверка</div>
+                        <div class="quality-check__details" th:text="${check.details}">Описание</div>
+                    </div>
+                    <div class="quality-check__value" th:text="${check.value}">0</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="card table-card" style="margin-top: 18px;">
         <div class="table-toolbar">
             <div>

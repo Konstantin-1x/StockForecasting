@@ -2,12 +2,15 @@ package org.example.parser.wb;
 
 import org.example.domain.CompetitorOffer;
 import org.example.domain.MarketplaceMonitoringJob;
+import org.example.domain.MarketplaceProductSnapshot;
 import org.example.domain.ProductCategory;
 import org.example.domain.TrackedMarketplaceProduct;
 import org.example.repository.CompetitorOfferRepository;
 import org.example.repository.MarketplaceMonitoringJobRepository;
+import org.example.repository.MarketplaceProductSnapshotRepository;
 import org.example.repository.ProductCategoryRepository;
 import org.example.repository.TrackedMarketplaceProductRepository;
+import org.example.web.data.DataTransferState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -38,7 +41,9 @@ public class WildberriesProductDiscoveryService {
     private final CompetitorOfferRepository offerRepository;
     private final TrackedMarketplaceProductRepository trackedProductRepository;
     private final MarketplaceMonitoringJobRepository monitoringJobRepository;
+    private final MarketplaceProductSnapshotRepository snapshotRepository;
     private final ExecutorService wildberriesParserExecutor;
+    private final DataTransferState transferState;
     private final Set<String> seenArticles = ConcurrentHashMap.newKeySet();
     private final AtomicBoolean baselineReady = new AtomicBoolean(false);
     private final AtomicBoolean scanRunning = new AtomicBoolean(false);
@@ -50,6 +55,8 @@ public class WildberriesProductDiscoveryService {
                                               CompetitorOfferRepository offerRepository,
                                               TrackedMarketplaceProductRepository trackedProductRepository,
                                               MarketplaceMonitoringJobRepository monitoringJobRepository,
+                                              MarketplaceProductSnapshotRepository snapshotRepository,
+                                              DataTransferState transferState,
                                               ExecutorService wildberriesParserExecutor) {
         this.properties = properties;
         this.httpClient = httpClient;
@@ -58,6 +65,8 @@ public class WildberriesProductDiscoveryService {
         this.offerRepository = offerRepository;
         this.trackedProductRepository = trackedProductRepository;
         this.monitoringJobRepository = monitoringJobRepository;
+        this.snapshotRepository = snapshotRepository;
+        this.transferState = transferState;
         this.wildberriesParserExecutor = wildberriesParserExecutor;
     }
 
@@ -65,6 +74,10 @@ public class WildberriesProductDiscoveryService {
     public void startDiscoveryOnApplicationReady() {
         if (!properties.isContinuousScanEnabled()) {
             log.info("Wildberries continuous discovery scan is disabled");
+            return;
+        }
+        if (transferState.isTransferInProgress()) {
+            log.info("Wildberries startup discovery scan skipped: data transfer is running");
             return;
         }
         CompletableFuture.runAsync(() -> {
@@ -84,6 +97,10 @@ public class WildberriesProductDiscoveryService {
         if (!properties.isContinuousScanEnabled()) {
             return;
         }
+        if (transferState.isTransferInProgress()) {
+            log.info("Wildberries discovery scan skipped: data transfer is running");
+            return;
+        }
         try {
             runDiscoveryScan();
         } catch (RuntimeException e) {
@@ -92,20 +109,13 @@ public class WildberriesProductDiscoveryService {
     }
 
     public WildberriesDiscoveryResult runDiscoveryScan() {
+        if (transferState.isTransferInProgress()) {
+            log.info("Wildberries discovery scan skipped: data transfer is running");
+            return skippedDiscoveryResult(shouldUseBaseline());
+        }
         if (!scanRunning.compareAndSet(false, true)) {
             log.info("Wildberries discovery scan is already running");
-            return new WildberriesDiscoveryResult(
-                    shouldUseBaseline(),
-                    baselineReady.get(),
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0,
-                    0
-            );
+            return skippedDiscoveryResult(shouldUseBaseline());
         }
 
         boolean baselineScan = shouldUseBaseline();
@@ -272,6 +282,7 @@ public class WildberriesProductDiscoveryService {
         trackedProduct.setMarketplaceArticle(product.article());
         trackedProduct.setProductName(product.name());
         trackedProduct.setSellerName(product.supplier());
+        trackedProduct.setSupplierId(product.supplierId());
         trackedProduct.setDiscoveredPrice(product.price());
         trackedProduct.setFeedbackReward(product.feedbackReward());
         trackedProduct.setBenefitPercent(product.benefitPercent());
@@ -293,6 +304,9 @@ public class WildberriesProductDiscoveryService {
             TrackedMarketplaceProduct savedProduct = trackedProductRepository.save(trackedProduct);
             job.setProduct(savedProduct);
             monitoringJobRepository.save(job);
+            saveInitialSnapshot(savedProduct, product, discoveredAt);
+            job.setStage(1);
+            monitoringJobRepository.save(job);
             log.info("New WB product discovered: article={}, nextMeasurementAt={}",
                     product.article(),
                     job.getNextRunAt());
@@ -301,6 +315,23 @@ public class WildberriesProductDiscoveryService {
             log.info("WB product {} was already registered by another scan task", product.article());
             return ProductDiscoveryResult.skippedProduct();
         }
+    }
+
+    private void saveInitialSnapshot(TrackedMarketplaceProduct savedProduct,
+                                     WildberriesParsedProduct product,
+                                     Instant discoveredAt) {
+        MarketplaceProductSnapshot snapshot = new MarketplaceProductSnapshot();
+        snapshot.setProduct(savedProduct);
+        snapshot.setCollectedAt(discoveredAt);
+        snapshot.setPrice(product.price());
+        snapshot.setStockQuantity(product.stockQuantity());
+        snapshot.setFeedbackReward(product.feedbackReward());
+        snapshot.setBenefitPercent(product.benefitPercent());
+        snapshot.setRating(product.rating());
+        snapshot.setReviewsCount(product.reviewsCount());
+        snapshot.setMeasurementSource("DISCOVERY_CATALOG");
+        snapshot.setRawJson(product.rawJson());
+        snapshotRepository.save(snapshot);
     }
 
     private void saveCurrentOffer(ProductCategory category, WildberriesParsedProduct product) {
@@ -360,6 +391,21 @@ public class WildberriesProductDiscoveryService {
 
     private boolean shouldUseBaseline() {
         return properties.isBaselineOnStartup() && !baselineReady.get();
+    }
+
+    private WildberriesDiscoveryResult skippedDiscoveryResult(boolean baselineScan) {
+        return new WildberriesDiscoveryResult(
+                baselineScan,
+                baselineReady.get(),
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+        );
     }
 
     private void delayBetweenRequests() {

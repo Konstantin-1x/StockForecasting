@@ -154,6 +154,10 @@ a {
     grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.grid--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .card {
     border: 1px solid var(--line);
     border-radius: 8px;
@@ -174,6 +178,128 @@ a {
     margin-top: 8px;
     font-size: 30px;
     font-weight: 780;
+}
+
+.admin-grid {
+    margin-top: 18px;
+}
+
+.action-card {
+    padding: 18px;
+}
+
+.action-card__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.action-card h2 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.25;
+}
+
+.action-card p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.action-card__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.import-form {
+    display: grid;
+    gap: 12px;
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+}
+
+.field-label {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.file-input {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px;
+    background: #ffffff;
+    color: var(--ink);
+    font: inherit;
+    font-size: 13px;
+}
+
+.checkbox-line {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.checkbox-line input {
+    margin-top: 2px;
+}
+
+.quality-list {
+    display: grid;
+    gap: 8px;
+}
+
+.quality-check {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    border: 1px solid var(--line);
+    border-left-width: 4px;
+    border-radius: 8px;
+    padding: 10px 11px;
+    background: #ffffff;
+}
+
+.quality-check--ok {
+    border-left-color: var(--ok);
+}
+
+.quality-check--warn {
+    border-left-color: var(--warn);
+}
+
+.quality-check--bad {
+    border-left-color: var(--bad);
+}
+
+.quality-check__title {
+    font-weight: 730;
+    font-size: 13px;
+}
+
+.quality-check__details {
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.quality-check__value {
+    flex: 0 0 auto;
+    max-width: 210px;
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 760;
+    text-align: right;
 }
 
 .table-card {
@@ -518,6 +644,7 @@ tr:hover td {
     }
 
     .grid--3,
+    .grid--2,
     .grid--4 {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -561,6 +688,7 @@ tr:hover td {
     }
 
     .grid--3,
+    .grid--2,
     .grid--4 {
         grid-template-columns: 1fr;
     }

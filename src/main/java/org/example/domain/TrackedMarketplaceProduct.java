@@ -51,6 +51,9 @@ public class TrackedMarketplaceProduct {
     @Column(name = "seller_name", length = 250)
     private String sellerName;
 
+    @Column(name = "supplier_id")
+    private Long supplierId;
+
     @Column(name = "discovered_price", precision = 12, scale = 2)
     private BigDecimal discoveredPrice;
 
@@ -112,6 +115,14 @@ public class TrackedMarketplaceProduct {
 
     public void setSellerName(String sellerName) {
         this.sellerName = sellerName;
+    }
+
+    public Long getSupplierId() {
+        return supplierId;
+    }
+
+    public void setSupplierId(Long supplierId) {
+        this.supplierId = supplierId;
     }
 
     public BigDecimal getDiscoveredPrice() {

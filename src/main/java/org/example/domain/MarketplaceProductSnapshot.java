@@ -54,6 +54,9 @@ public class MarketplaceProductSnapshot {
     @Column(name = "reviews_count")
     private Integer reviewsCount;
 
+    @Column(name = "measurement_source", length = 40)
+    private String measurementSource;
+
     @Lob
     @Column(name = "raw_json", columnDefinition = "text")
     private String rawJson;
@@ -124,6 +127,14 @@ public class MarketplaceProductSnapshot {
 
     public void setReviewsCount(Integer reviewsCount) {
         this.reviewsCount = reviewsCount;
+    }
+
+    public String getMeasurementSource() {
+        return measurementSource;
+    }
+
+    public void setMeasurementSource(String measurementSource) {
+        this.measurementSource = measurementSource;
     }
 
     public String getRawJson() {

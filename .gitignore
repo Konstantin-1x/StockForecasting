@@ -3,8 +3,15 @@
 .gradle-user2/
 build/
 data/
+exports/
+*.dump
+*.backup
+*.env
 cookies.txt
 cookie.txt
+proxies.txt
+proxy_http_ip.txt
+proxy_https_ip.txt
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
