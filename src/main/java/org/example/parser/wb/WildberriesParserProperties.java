@@ -37,6 +37,7 @@ public class WildberriesParserProperties {
     private boolean baselineOnStartup = true;
     private int scanParallelism = 50;
     private int monitorBatchSize = 50;
+    private int monitorParallelism = 8;
     private long scanInitialDelayMs = 900_000;
     private long scanFixedDelayMs = 900_000;
     private long monitorInitialDelayMs = 30_000;
@@ -274,6 +275,14 @@ public class WildberriesParserProperties {
 
     public void setMonitorBatchSize(int monitorBatchSize) {
         this.monitorBatchSize = monitorBatchSize;
+    }
+
+    public int getMonitorParallelism() {
+        return monitorParallelism;
+    }
+
+    public void setMonitorParallelism(int monitorParallelism) {
+        this.monitorParallelism = monitorParallelism;
     }
 
     public long getScanInitialDelayMs() {

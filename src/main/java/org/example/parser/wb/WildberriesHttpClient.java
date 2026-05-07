@@ -17,6 +17,8 @@ import java.net.InetSocketAddress;
 import java.net.PasswordAuthentication;
 import java.net.Socket;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -28,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.GZIPInputStream;
 import javax.net.ssl.SNIHostName;
 import javax.net.ssl.SSLParameters;
@@ -44,21 +47,21 @@ public class WildberriesHttpClient {
     private static volatile boolean proxyAuthenticatorInstalled;
 
     private final WildberriesParserProperties properties;
-    private final CookieRotator cookieRotator;
+    private final Object cookieReloadLock = new Object();
     private final WildberriesProxyPool proxyPool;
+    private final AtomicLong nextDetailRequestAtMillis = new AtomicLong();
+    private volatile CookieRotator cookieRotator;
+    private volatile String cookieFileSignature = "";
 
     public WildberriesHttpClient(WildberriesParserProperties properties) {
         this.properties = properties;
         installProxyAuthenticator();
-        this.cookieRotator = CookieFileLoader.load(
-                properties.getCookieFile(),
-                properties.getCookieSwitchWindowSize(),
-                properties.getCookieSwitchMinSamples(),
-                properties.getCookieSwitchHttp498Threshold()
-        );
+        this.cookieRotator = loadCookieRotator();
+        this.cookieFileSignature = cookieFileSignature(properties.getCookieFile());
         this.proxyPool = properties.isProxyEnabled()
                 ? WildberriesProxyFileLoader.load(properties)
                 : WildberriesProxyPool.direct();
+        logCookieDiagnostics();
         if (!properties.isProxyEnabled()) {
             log.info("WB proxies are disabled. Requests will be sent directly.");
         }
@@ -107,12 +110,17 @@ public class WildberriesHttpClient {
     }
 
     private String executeJsonRequest(String url, String referer, WildberriesProxy proxy) throws IOException {
+        refreshCookiesIfFileChanged();
+        throttleProductDetailRequests(url);
         RawResponse response = proxy != null && proxy.secure()
                 ? executeSecureProxyJsonRequest(url, referer, proxy)
                 : executeJsoupJsonRequest(url, referer, proxy);
         int statusCode = response.statusCode();
         String body = response.body();
         cookieRotator.recordStatusCode(statusCode);
+        if (statusCode == 498) {
+            refreshCookiesIfFileChanged();
+        }
         if (statusCode < 200 || statusCode >= 300) {
             logHttpStatus(url, statusCode, proxy);
             throw new WildberriesHttpStatusException(statusCode, url, retryAfter(response.retryAfter()));
@@ -399,6 +407,103 @@ public class WildberriesHttpClient {
             String value = separator < trimmed.length() - 1 ? trimmed.substring(separator + 1).trim() : "";
             connection.cookie(name, value);
         }
+    }
+
+    private CookieRotator loadCookieRotator() {
+        return CookieFileLoader.load(
+                properties.getCookieFile(),
+                properties.getCookieSwitchWindowSize(),
+                properties.getCookieSwitchMinSamples(),
+                properties.getCookieSwitchHttp498Threshold()
+        );
+    }
+
+    private void refreshCookiesIfFileChanged() {
+        Path cookieFile = properties.getCookieFile();
+        String signature = cookieFileSignature(cookieFile);
+        if (signature.equals(cookieFileSignature)) {
+            return;
+        }
+        synchronized (cookieReloadLock) {
+            String currentSignature = cookieFileSignature(cookieFile);
+            if (currentSignature.equals(cookieFileSignature)) {
+                return;
+            }
+            CookieRotator reloaded = loadCookieRotator();
+            cookieRotator = reloaded;
+            cookieFileSignature = currentSignature;
+            logCookieDiagnostics();
+        }
+    }
+
+    private static String cookieFileSignature(Path cookieFile) {
+        if (cookieFile == null || !Files.exists(cookieFile)) {
+            return "missing";
+        }
+        try {
+            return Files.getLastModifiedTime(cookieFile).toMillis() + ":" + Files.size(cookieFile);
+        } catch (IOException e) {
+            return "unreadable:" + e.getClass().getSimpleName();
+        }
+    }
+
+    private void throttleProductDetailRequests(String url) throws IOException {
+        if (!isProductDetailUrl(url)) {
+            return;
+        }
+        Duration spacing = properties.getRequestDelay();
+        if (spacing == null || spacing.isZero() || spacing.isNegative()) {
+            return;
+        }
+        long spacingMillis = Math.max(1L, spacing.toMillis());
+        while (true) {
+            long now = System.currentTimeMillis();
+            long previous = nextDetailRequestAtMillis.get();
+            long scheduled = Math.max(now, previous);
+            long next = scheduled + spacingMillis;
+            if (!nextDetailRequestAtMillis.compareAndSet(previous, next)) {
+                continue;
+            }
+            long sleepMillis = scheduled - now;
+            if (sleepMillis > 0) {
+                try {
+                    Thread.sleep(sleepMillis);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new IOException("Interrupted while waiting for WB detail request throttle", e);
+                }
+            }
+            return;
+        }
+    }
+
+    private static boolean isProductDetailUrl(String url) {
+        return url != null && url.contains("/__internal/u-card/cards/v4/detail");
+    }
+
+    private void logCookieDiagnostics() {
+        int cookieSets = cookieRotator.size();
+        if (cookieSets <= 1) {
+            log.warn("Loaded only {} WB cookie set(s). HTTP 498 cookie rotation is limited.", cookieSets);
+        }
+        int pairs = countCookiePairs(cookieRotator.currentHeader());
+        if (pairs > 0 && pairs <= 2) {
+            log.warn("Current WB cookie set contains only {} cookie pair(s). A fuller browser cookie export may be required for stable detail requests.", pairs);
+        }
+    }
+
+    private static int countCookiePairs(String cookieHeader) {
+        if (cookieHeader == null || cookieHeader.isBlank()) {
+            return 0;
+        }
+        int count = 0;
+        for (String cookie : cookieHeader.split(";")) {
+            String trimmed = cookie.trim();
+            if (!trimmed.isEmpty() && trimmed.contains("=")) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private static IOException withProxyContext(IOException exception, WildberriesProxy proxy) {

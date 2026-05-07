@@ -55,6 +55,7 @@ wb:
     baseline-on-startup: ${WB_BASELINE_ON_STARTUP:true}
     scan-parallelism: ${WB_SCAN_PARALLELISM:50}
     monitor-batch-size: ${WB_MONITOR_BATCH_SIZE:50}
+    monitor-parallelism: ${WB_MONITOR_PARALLELISM:8}
     scan-initial-delay-ms: ${WB_SCAN_INITIAL_DELAY_MS:900000}
     scan-fixed-delay-ms: ${WB_SCAN_FIXED_DELAY_MS:900000}
     monitor-initial-delay-ms: ${WB_MONITOR_INITIAL_DELAY_MS:30000}

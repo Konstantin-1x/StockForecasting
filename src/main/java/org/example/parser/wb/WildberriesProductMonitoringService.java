@@ -75,7 +75,12 @@ public class WildberriesProductMonitoringService {
             return new WildberriesMonitoringRunResult(0, 0, runningJobs.size());
         }
         Instant now = Instant.now();
-        int limit = Math.max(1, properties.getMonitorBatchSize());
+        int parallelismLimit = Math.max(1, properties.getMonitorParallelism());
+        int availableSlots = Math.max(0, parallelismLimit - runningJobs.size());
+        if (availableSlots == 0) {
+            return new WildberriesMonitoringRunResult(0, 0, runningJobs.size());
+        }
+        int limit = Math.max(1, Math.min(properties.getMonitorBatchSize(), availableSlots));
         List<MarketplaceMonitoringJob> dueJobs = monitoringJobRepository.findDueJobs(
                 now,
                 PageRequest.of(0, limit)
