@@ -55,8 +55,8 @@ public class WildberriesProductMonitoringService {
     }
 
     @Scheduled(
-            initialDelayString = "${wb.parser.monitor-initial-delay-ms:30000}",
-            fixedDelayString = "${wb.parser.monitor-fixed-delay-ms:60000}"
+            initialDelayString = "${wb.parser.monitor-initial-delay-ms:60000}",
+            fixedDelayString = "${wb.parser.monitor-fixed-delay-ms:3600000}"
     )
     public void scheduledMonitoringRun() {
         if (!properties.isMonitoringEnabled()) {
@@ -75,12 +75,7 @@ public class WildberriesProductMonitoringService {
             return new WildberriesMonitoringRunResult(0, 0, runningJobs.size());
         }
         Instant now = Instant.now();
-        int parallelismLimit = Math.max(1, properties.getMonitorParallelism());
-        int availableSlots = Math.max(0, parallelismLimit - runningJobs.size());
-        if (availableSlots == 0) {
-            return new WildberriesMonitoringRunResult(0, 0, runningJobs.size());
-        }
-        int limit = Math.max(1, Math.min(properties.getMonitorBatchSize(), availableSlots));
+        int limit = Math.max(1, properties.getMonitorBatchSize());
         List<MarketplaceMonitoringJob> dueJobs = monitoringJobRepository.findDueJobs(
                 now,
                 PageRequest.of(0, limit)
@@ -148,6 +143,10 @@ public class WildberriesProductMonitoringService {
         product.setSellerName(details.supplier());
         product.setSupplierId(details.supplierId());
         product.setDetailUrl(detailUrl);
+        product.setDiscoveredPrice(details.price());
+        product.setDiscoveredStock(details.stockQuantity());
+        product.setFeedbackReward(details.feedbackReward());
+        product.setBenefitPercent(details.benefitPercent());
 
         job.setLastRunAt(collectedAt);
         job.setLastError(null);

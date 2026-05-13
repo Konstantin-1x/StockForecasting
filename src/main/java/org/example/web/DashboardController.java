@@ -1,6 +1,7 @@
 package org.example.web;
 
 import org.example.domain.CompetitorOffer;
+import org.example.forecast.NeuralForecastJobService;
 import org.example.parser.wb.WildberriesImportResult;
 import org.example.parser.wb.WildberriesParserService;
 import org.example.repository.CompetitorOfferRepository;
@@ -35,6 +36,7 @@ public class DashboardController {
     private final WildberriesParserService parserService;
     private final CategoryCatalogService categoryCatalogService;
     private final ForecastDataQualityService forecastDataQualityService;
+    private final NeuralForecastJobService neuralForecastJobService;
 
     public DashboardController(SellerRepository sellerRepository,
                                ProductRepository productRepository,
@@ -44,7 +46,8 @@ public class DashboardController {
                                CompetitorOfferRepository offerRepository,
                                WildberriesParserService parserService,
                                CategoryCatalogService categoryCatalogService,
-                               ForecastDataQualityService forecastDataQualityService) {
+                               ForecastDataQualityService forecastDataQualityService,
+                               NeuralForecastJobService neuralForecastJobService) {
         this.sellerRepository = sellerRepository;
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
@@ -54,6 +57,7 @@ public class DashboardController {
         this.parserService = parserService;
         this.categoryCatalogService = categoryCatalogService;
         this.forecastDataQualityService = forecastDataQualityService;
+        this.neuralForecastJobService = neuralForecastJobService;
     }
 
     @GetMapping("/")
@@ -106,6 +110,7 @@ public class DashboardController {
     @GetMapping("/forecasts")
     public String forecasts(Model model) {
         model.addAttribute("forecasts", forecastRepository.findAll(Sort.by(Sort.Direction.DESC, "calculatedAt")));
+        model.addAttribute("neuralForecastJobStatus", neuralForecastJobService.currentStatus());
         return "forecasts";
     }
 
@@ -120,6 +125,7 @@ public class DashboardController {
                 PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "collectedAt"))
         ));
         model.addAttribute("qualityReport", forecastDataQualityService.buildReport());
+        model.addAttribute("neuralForecastJobStatus", neuralForecastJobService.currentStatus());
         return "admin";
     }
 
@@ -129,13 +135,26 @@ public class DashboardController {
                                     RedirectAttributes redirectAttributes) {
         try {
             WildberriesImportResult result = parserService.importRublesForReviews(maxCategories, maxPagesPerCategory);
-            redirectAttributes.addFlashAttribute("status", "Импорт завершен: сохранено "
-                    + result.offersSaved() + " предложений, обработано "
-                    + result.pagesProcessed() + " страниц.");
+            redirectAttributes.addFlashAttribute(
+                    "status",
+                    "Импорт завершен: сохранено " + result.offersSaved()
+                            + " предложений, обработано " + result.pagesProcessed() + " страниц."
+            );
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", "Импорт не выполнен: " + e.getMessage());
         }
         return "redirect:/offers";
+    }
+
+    @PostMapping("/admin/forecasts/recalculate")
+    public String recalculateNeuralForecasts(RedirectAttributes redirectAttributes) {
+        boolean started = neuralForecastJobService.startRecalculation();
+        if (started) {
+            redirectAttributes.addFlashAttribute("status", "Нейросетевой пересчет запущен в фоне. Статус можно смотреть на странице прогнозов.");
+        } else {
+            redirectAttributes.addFlashAttribute("status", "Нейросетевой пересчет уже выполняется.");
+        }
+        return "redirect:/forecasts";
     }
 
     private static List<Integer> pageNumbers(Page<?> page) {

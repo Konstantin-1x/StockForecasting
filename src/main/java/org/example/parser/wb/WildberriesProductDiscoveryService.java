@@ -1,12 +1,10 @@
 package org.example.parser.wb;
 
 import org.example.domain.CompetitorOffer;
-import org.example.domain.MarketplaceMonitoringJob;
 import org.example.domain.MarketplaceProductSnapshot;
 import org.example.domain.ProductCategory;
 import org.example.domain.TrackedMarketplaceProduct;
 import org.example.repository.CompetitorOfferRepository;
-import org.example.repository.MarketplaceMonitoringJobRepository;
 import org.example.repository.MarketplaceProductSnapshotRepository;
 import org.example.repository.ProductCategoryRepository;
 import org.example.repository.TrackedMarketplaceProductRepository;
@@ -20,8 +18,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,7 +40,6 @@ public class WildberriesProductDiscoveryService {
     private final ProductCategoryRepository categoryRepository;
     private final CompetitorOfferRepository offerRepository;
     private final TrackedMarketplaceProductRepository trackedProductRepository;
-    private final MarketplaceMonitoringJobRepository monitoringJobRepository;
     private final MarketplaceProductSnapshotRepository snapshotRepository;
     private final ExecutorService wildberriesParserExecutor;
     private final DataTransferState transferState;
@@ -54,7 +53,6 @@ public class WildberriesProductDiscoveryService {
                                               ProductCategoryRepository categoryRepository,
                                               CompetitorOfferRepository offerRepository,
                                               TrackedMarketplaceProductRepository trackedProductRepository,
-                                              MarketplaceMonitoringJobRepository monitoringJobRepository,
                                               MarketplaceProductSnapshotRepository snapshotRepository,
                                               DataTransferState transferState,
                                               ExecutorService wildberriesParserExecutor) {
@@ -64,7 +62,6 @@ public class WildberriesProductDiscoveryService {
         this.categoryRepository = categoryRepository;
         this.offerRepository = offerRepository;
         this.trackedProductRepository = trackedProductRepository;
-        this.monitoringJobRepository = monitoringJobRepository;
         this.snapshotRepository = snapshotRepository;
         this.transferState = transferState;
         this.wildberriesParserExecutor = wildberriesParserExecutor;
@@ -90,8 +87,8 @@ public class WildberriesProductDiscoveryService {
     }
 
     @Scheduled(
-            initialDelayString = "${wb.parser.scan-initial-delay-ms:900000}",
-            fixedDelayString = "${wb.parser.scan-fixed-delay-ms:900000}"
+            initialDelayString = "${wb.parser.scan-initial-delay-ms:3600000}",
+            fixedDelayString = "${wb.parser.scan-fixed-delay-ms:3600000}"
     )
     public void scheduledDiscoveryScan() {
         if (!properties.isContinuousScanEnabled()) {
@@ -119,6 +116,7 @@ public class WildberriesProductDiscoveryService {
         }
 
         boolean baselineScan = shouldUseBaseline();
+        Set<String> articlesSeenInScan = ConcurrentHashMap.newKeySet();
         try {
             String menuJson = httpClient.getJson(properties.getPromotionsUrl(), "https://www.wildberries.ru/");
             List<WildberriesCategoryRef> categories = responseParser.parsePromotionCategories(menuJson);
@@ -126,14 +124,14 @@ public class WildberriesProductDiscoveryService {
             List<WildberriesCategoryRef> categoriesToScan = limitCategories(categories.stream()
                     .filter(WildberriesCategoryRef::scannable)
                     .toList());
-            log.info("Wildberries discovery scan started: baseline={}, categoriesLoaded={}, categoriesToScan={}",
+            log.info("Wildberries hourly catalog snapshot started: baseline={}, categoriesLoaded={}, categoriesToScan={}",
                     baselineScan,
                     categories.size(),
                     categoriesToScan.size());
 
             List<CompletableFuture<CategoryScanResult>> futures = categoriesToScan.stream()
                     .map(category -> CompletableFuture
-                            .supplyAsync(() -> scanCategory(category, baselineScan), wildberriesParserExecutor)
+                            .supplyAsync(() -> scanCategory(category, baselineScan, articlesSeenInScan), wildberriesParserExecutor)
                             .exceptionally(error -> {
                                 log.warn("WB category scan failed for {}: {}",
                                         category.categoryUrl(),
@@ -159,6 +157,15 @@ public class WildberriesProductDiscoveryService {
                 errors += result.errors();
             }
 
+            if (errors == 0 && !categoriesToScan.isEmpty() && isFullCatalogSnapshot()) {
+                int closedProducts = closeProductsMissingFromCurrentSnapshot(articlesSeenInScan, Instant.now());
+                existingProductsSkipped += closedProducts;
+            } else if (errors > 0) {
+                log.warn("WB hourly catalog snapshot had {} error(s); missing products were not closed in this run", errors);
+            } else if (!isFullCatalogSnapshot()) {
+                log.info("WB hourly catalog snapshot used scan limits; missing products were not closed in this run");
+            }
+
             if (baselineScan) {
                 baselineReady.set(true);
             }
@@ -175,7 +182,7 @@ public class WildberriesProductDiscoveryService {
                     existingProductsSkipped,
                     errors
             );
-            log.info("Wildberries discovery scan finished: {}", result);
+            log.info("Wildberries hourly catalog snapshot finished: {}", result);
             return result;
         } catch (IOException e) {
             throw new IllegalStateException("Wildberries discovery scan failed: " + e.getMessage(), e);
@@ -202,7 +209,9 @@ public class WildberriesProductDiscoveryService {
         return scanRunning.get();
     }
 
-    private CategoryScanResult scanCategory(WildberriesCategoryRef categoryRef, boolean baselineScan) {
+    private CategoryScanResult scanCategory(WildberriesCategoryRef categoryRef,
+                                            boolean baselineScan,
+                                            Set<String> articlesSeenInScan) {
         ProductCategory category = saveCategory(categoryRef);
         int pagesToRead = maxPagesToRead();
         int pagesScanned = 0;
@@ -230,8 +239,7 @@ public class WildberriesProductDiscoveryService {
                 }
 
                 for (WildberriesParsedProduct product : page.products()) {
-                    saveCurrentOffer(category, product);
-                    ProductDiscoveryResult productResult = handleProduct(category, product, baselineScan);
+                    ProductDiscoveryResult productResult = handleProduct(category, product, baselineScan, articlesSeenInScan);
                     productsSeen++;
                     baselineProductsAdded += productResult.baselineAdded();
                     newProductsCreated += productResult.created();
@@ -262,22 +270,46 @@ public class WildberriesProductDiscoveryService {
 
     private ProductDiscoveryResult handleProduct(ProductCategory category,
                                                  WildberriesParsedProduct product,
-                                                 boolean baselineScan) {
-        if (baselineScan) {
-            return seenArticles.add(product.article())
-                    ? ProductDiscoveryResult.baselineProduct()
-                    : ProductDiscoveryResult.skippedProduct();
+                                                 boolean baselineScan,
+                                                 Set<String> articlesSeenInScan) {
+        if (!articlesSeenInScan.add(product.article())) {
+            return ProductDiscoveryResult.skippedProduct();
         }
+        seenArticles.add(product.article());
+        saveCurrentOffer(category, product);
 
-        if (!seenArticles.add(product.article())) {
-            return ProductDiscoveryResult.skippedProduct();
-        }
-        if (trackedProductRepository.existsByMarketplaceArticle(product.article())) {
-            return ProductDiscoveryResult.skippedProduct();
+        Optional<TrackedMarketplaceProduct> existing = trackedProductRepository.findByMarketplaceArticle(product.article());
+        if (existing.isPresent()) {
+            TrackedMarketplaceProduct trackedProduct = existing.get();
+            if (!trackedProduct.isActive()) {
+                return ProductDiscoveryResult.skippedProduct();
+            }
+            updateTrackedProduct(trackedProduct, category, product);
+            TrackedMarketplaceProduct savedProduct = trackedProductRepository.save(trackedProduct);
+            saveCatalogSnapshot(savedProduct, product, Instant.now());
+            return baselineScan ? ProductDiscoveryResult.baselineProduct() : ProductDiscoveryResult.skippedProduct();
         }
 
         Instant discoveredAt = Instant.now();
         TrackedMarketplaceProduct trackedProduct = new TrackedMarketplaceProduct();
+        trackedProduct.setDiscoveredAt(discoveredAt);
+        trackedProduct.setActive(true);
+        updateTrackedProduct(trackedProduct, category, product);
+
+        try {
+            TrackedMarketplaceProduct savedProduct = trackedProductRepository.save(trackedProduct);
+            saveCatalogSnapshot(savedProduct, product, discoveredAt);
+            log.info("New WB product registered from hourly catalog snapshot: article={}", product.article());
+            return ProductDiscoveryResult.createdProduct();
+        } catch (DataIntegrityViolationException e) {
+            log.info("WB product {} was already registered by another scan task", product.article());
+            return ProductDiscoveryResult.skippedProduct();
+        }
+    }
+
+    private void updateTrackedProduct(TrackedMarketplaceProduct trackedProduct,
+                                      ProductCategory category,
+                                      WildberriesParsedProduct product) {
         trackedProduct.setCategory(category);
         trackedProduct.setMarketplaceArticle(product.article());
         trackedProduct.setProductName(product.name());
@@ -289,40 +321,14 @@ public class WildberriesProductDiscoveryService {
         trackedProduct.setDiscoveredStock(product.stockQuantity());
         trackedProduct.setCardUrl(product.cardUrl());
         trackedProduct.setDetailUrl(WildberriesProductDetailUrlBuilder.build(product.article()));
-        trackedProduct.setDiscoveredAt(discoveredAt);
-        trackedProduct.setActive(true);
-
-        MarketplaceMonitoringJob job = new MarketplaceMonitoringJob();
-        job.setProduct(trackedProduct);
-        job.setStage(0);
-        job.setNextRunAt(discoveredAt.plus(properties.getProductMeasurementDelay()));
-        job.setFinished(false);
-        job.setCreatedAt(discoveredAt);
-        job.setUpdatedAt(discoveredAt);
-
-        try {
-            TrackedMarketplaceProduct savedProduct = trackedProductRepository.save(trackedProduct);
-            job.setProduct(savedProduct);
-            monitoringJobRepository.save(job);
-            saveInitialSnapshot(savedProduct, product, discoveredAt);
-            job.setStage(1);
-            monitoringJobRepository.save(job);
-            log.info("New WB product discovered: article={}, nextMeasurementAt={}",
-                    product.article(),
-                    job.getNextRunAt());
-            return ProductDiscoveryResult.createdProduct();
-        } catch (DataIntegrityViolationException e) {
-            log.info("WB product {} was already registered by another scan task", product.article());
-            return ProductDiscoveryResult.skippedProduct();
-        }
     }
 
-    private void saveInitialSnapshot(TrackedMarketplaceProduct savedProduct,
+    private void saveCatalogSnapshot(TrackedMarketplaceProduct savedProduct,
                                      WildberriesParsedProduct product,
-                                     Instant discoveredAt) {
+                                     Instant collectedAt) {
         MarketplaceProductSnapshot snapshot = new MarketplaceProductSnapshot();
         snapshot.setProduct(savedProduct);
-        snapshot.setCollectedAt(discoveredAt);
+        snapshot.setCollectedAt(collectedAt);
         snapshot.setPrice(product.price());
         snapshot.setStockQuantity(product.stockQuantity());
         snapshot.setFeedbackReward(product.feedbackReward());
@@ -332,6 +338,35 @@ public class WildberriesProductDiscoveryService {
         snapshot.setMeasurementSource("DISCOVERY_CATALOG");
         snapshot.setRawJson(product.rawJson());
         snapshotRepository.save(snapshot);
+    }
+
+    private int closeProductsMissingFromCurrentSnapshot(Set<String> articlesSeenInScan, Instant collectedAt) {
+        int closedProducts = 0;
+        for (TrackedMarketplaceProduct product : trackedProductRepository.findAllByActiveTrue()) {
+            if (articlesSeenInScan.contains(product.getMarketplaceArticle())) {
+                continue;
+            }
+
+            MarketplaceProductSnapshot snapshot = new MarketplaceProductSnapshot();
+            snapshot.setProduct(product);
+            snapshot.setCollectedAt(collectedAt);
+            snapshot.setPrice(product.getDiscoveredPrice());
+            snapshot.setStockQuantity(0);
+            snapshot.setFeedbackReward(BigDecimal.ZERO);
+            snapshot.setBenefitPercent(BigDecimal.ZERO);
+            snapshot.setMeasurementSource("DISCOVERY_ABSENT");
+            snapshotRepository.save(snapshot);
+
+            product.setActive(false);
+            product.setCompletedAt(collectedAt);
+            product.setDiscoveredStock(0);
+            trackedProductRepository.save(product);
+            closedProducts++;
+        }
+        if (closedProducts > 0) {
+            log.info("Closed {} WB product time-series absent from current hourly catalog snapshot", closedProducts);
+        }
+        return closedProducts;
     }
 
     private void saveCurrentOffer(ProductCategory category, WildberriesParsedProduct product) {
@@ -387,6 +422,10 @@ public class WildberriesProductDiscoveryService {
             return Integer.MAX_VALUE;
         }
         return properties.getMaxPagesPerCategory();
+    }
+
+    private boolean isFullCatalogSnapshot() {
+        return properties.getMaxCategories() <= 0 && properties.getMaxPagesPerCategory() <= 0;
     }
 
     private boolean shouldUseBaseline() {

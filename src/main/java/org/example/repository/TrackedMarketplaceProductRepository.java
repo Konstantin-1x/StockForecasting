@@ -3,6 +3,7 @@ package org.example.repository;
 import org.example.domain.TrackedMarketplaceProduct;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface TrackedMarketplaceProductRepository extends JpaRepository<TrackedMarketplaceProduct, Long> {
@@ -12,4 +13,6 @@ public interface TrackedMarketplaceProductRepository extends JpaRepository<Track
     Optional<TrackedMarketplaceProduct> findByMarketplaceArticle(String marketplaceArticle);
 
     long countByActiveTrue();
+
+    List<TrackedMarketplaceProduct> findAllByActiveTrue();
 }

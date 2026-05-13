@@ -51,14 +51,14 @@ wb:
     spa-version: ${WB_SPA_VERSION:14.8.1}
     device-id: ${WB_DEVICE_ID:}
     continuous-scan-enabled: ${WB_CONTINUOUS_SCAN_ENABLED:true}
-    monitoring-enabled: ${WB_MONITORING_ENABLED:true}
+    monitoring-enabled: ${WB_MONITORING_ENABLED:false}
     baseline-on-startup: ${WB_BASELINE_ON_STARTUP:true}
-    scan-parallelism: ${WB_SCAN_PARALLELISM:50}
-    monitor-batch-size: ${WB_MONITOR_BATCH_SIZE:50}
-    monitor-parallelism: ${WB_MONITOR_PARALLELISM:8}
-    scan-initial-delay-ms: ${WB_SCAN_INITIAL_DELAY_MS:900000}
-    scan-fixed-delay-ms: ${WB_SCAN_FIXED_DELAY_MS:900000}
-    monitor-initial-delay-ms: ${WB_MONITOR_INITIAL_DELAY_MS:30000}
-    monitor-fixed-delay-ms: ${WB_MONITOR_FIXED_DELAY_MS:60000}
+    scan-parallelism: ${WB_SCAN_PARALLELISM:20}
+    monitor-batch-size: ${WB_MONITOR_BATCH_SIZE:5000}
+    monitor-parallelism: ${WB_MONITOR_PARALLELISM:20}
+    scan-initial-delay-ms: ${WB_SCAN_INITIAL_DELAY_MS:3600000}
+    scan-fixed-delay-ms: ${WB_SCAN_FIXED_DELAY_MS:3600000}
+    monitor-initial-delay-ms: ${WB_MONITOR_INITIAL_DELAY_MS:60000}
+    monitor-fixed-delay-ms: ${WB_MONITOR_FIXED_DELAY_MS:3600000}
     product-measurement-delay: ${WB_PRODUCT_MEASUREMENT_DELAY:1h}
     product-rate-limit-retry-delay: ${WB_PRODUCT_RATE_LIMIT_RETRY_DELAY:1m}

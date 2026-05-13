@@ -33,15 +33,15 @@ public class WildberriesParserProperties {
     private String spaVersion = "14.8.1";
     private String deviceId = "";
     private boolean continuousScanEnabled = true;
-    private boolean monitoringEnabled = true;
+    private boolean monitoringEnabled = false;
     private boolean baselineOnStartup = true;
-    private int scanParallelism = 50;
-    private int monitorBatchSize = 50;
-    private int monitorParallelism = 8;
-    private long scanInitialDelayMs = 900_000;
-    private long scanFixedDelayMs = 900_000;
-    private long monitorInitialDelayMs = 30_000;
-    private long monitorFixedDelayMs = 60_000;
+    private int scanParallelism = 20;
+    private int monitorBatchSize = 5_000;
+    private int monitorParallelism = 20;
+    private long scanInitialDelayMs = 3_600_000;
+    private long scanFixedDelayMs = 3_600_000;
+    private long monitorInitialDelayMs = 60_000;
+    private long monitorFixedDelayMs = 3_600_000;
     private Duration productMeasurementDelay = Duration.ofHours(1);
     private Duration productRateLimitRetryDelay = Duration.ofMinutes(1);
 

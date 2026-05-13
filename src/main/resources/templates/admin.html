@@ -5,7 +5,7 @@
     <section class="page-head">
         <div>
             <h1>Админ-панель</h1>
-            <p>Административная сводка по продавцам, данным парсинга и прогнозам.</p>
+            <p>Здесь собраны операции обслуживания данных, контроль качества временных рядов и запуск нейросетевого прогнозирования для ВКР.</p>
         </div>
     </section>
 
@@ -59,7 +59,7 @@
             <div class="action-card__head">
                 <div>
                     <h2>Проверка перед прогнозированием</h2>
-                    <p>Контроль структуры, целостности, пропусков и аномалий временного ряда.</p>
+                    <p>Контроль структуры, целостности, пропусков и аномалий временного ряда перед обучением модели.</p>
                 </div>
                 <span class="badge"
                       th:classappend="${qualityReport.hasCriticalIssues()} ? ' badge--warn' : ' badge--ok'"
@@ -80,11 +80,37 @@
         </div>
     </section>
 
+    <section class="card action-card" style="margin-top: 18px;">
+        <div class="action-card__head">
+            <div>
+                <h2>Нейросетевой прогноз акций</h2>
+                <p>Обучение MLP-модели по историческим срезам товаров Wildberries. Модель прогнозирует будущую акционную цену, время до начала акции и остаток товара во время акции.</p>
+            </div>
+            <span class="badge badge--ok">MLP</span>
+        </div>
+        <div class="action-card__actions">
+            <form th:action="@{/admin/forecasts/recalculate}" method="post">
+                <button class="btn" type="submit">Пересчитать нейросетевые прогнозы</button>
+            </form>
+        </div>
+        <div class="quality-list" th:if="${neuralForecastJobStatus}" style="margin-top: 14px;">
+            <div class="quality-check"
+                 th:classappend="${neuralForecastJobStatus.running()} ? ' quality-check--warn' : ' quality-check--ok'">
+                <div>
+                    <div class="quality-check__title">Статус нейросети</div>
+                    <div class="quality-check__details" th:text="${neuralForecastJobStatus.message()}">Статус</div>
+                </div>
+                <div class="quality-check__value"
+                     th:text="${neuralForecastJobStatus.running()} ? 'В работе' : 'Готово'">Готово</div>
+            </div>
+        </div>
+    </section>
+
     <section class="card table-card" style="margin-top: 18px;">
         <div class="table-toolbar">
             <div>
                 <div class="table-toolbar__title">Журнал последних собранных предложений</div>
-                <div class="table-toolbar__hint">Эта таблица показывает связь интерфейса с PostgreSQL.</div>
+                <div class="table-toolbar__hint">Эта таблица показывает связь интерфейса с PostgreSQL и актуальность поступающих данных.</div>
             </div>
             <span class="badge badge--ok" th:text="${offerCount} + ' записей'">0 записей</span>
         </div>
