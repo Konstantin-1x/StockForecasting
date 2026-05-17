@@ -16,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class CategoryCatalogService {
@@ -108,6 +109,27 @@ public class CategoryCatalogService {
         return tree.nodesByKey().containsKey(normalizedSelectedKey) ? normalizedSelectedKey : null;
     }
 
+    @Transactional(readOnly = true)
+    public Optional<ProductCategory> selectedProductCategory(String selectedCategoryKey) {
+        String normalizedSelectedKey = normalizeKey(selectedCategoryKey);
+        if (normalizedSelectedKey == null) {
+            return Optional.empty();
+        }
+        return categoryRepository.findAll().stream()
+                .filter(category -> normalizedSelectedKey.equals(normalizeKey(category.getExternalUrl())))
+                .findFirst();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<String> categoryKeyForId(Long categoryId) {
+        if (categoryId == null) {
+            return Optional.empty();
+        }
+        return categoryRepository.findById(categoryId)
+                .map(ProductCategory::getExternalUrl)
+                .map(CategoryCatalogService::normalizeKey);
+    }
+
     private CategoryTree buildTree() {
         List<ProductCategory> categories = categoryRepository.findAll(Sort.by("name"));
         Map<String, CategoryNode> nodesByKey = new LinkedHashMap<>();
@@ -130,6 +152,7 @@ public class CategoryCatalogService {
                 CategoryNode node = nodesByKey.computeIfAbsent(key, ignored -> new CategoryNode(key, name));
                 if (leaf) {
                     node.name(name);
+                    node.categoryId(category.getId());
                 }
                 if (parent != null) {
                     parent.addChild(node);
@@ -174,6 +197,7 @@ public class CategoryCatalogService {
         boolean activeTrail = selectedNode != null && selectedNode.key().startsWith(node.key() + "/");
         return new CategoryCatalogItem(
                 node.key(),
+                node.categoryId(),
                 node.name(),
                 depth,
                 selected,
@@ -244,6 +268,7 @@ public class CategoryCatalogService {
         private final List<CategoryNode> children = new ArrayList<>();
         private final Map<String, CategoryNode> childKeys = new HashMap<>();
         private String name;
+        private Long categoryId;
         private CategoryNode parent;
 
         private CategoryNode(String key, String name) {
@@ -261,6 +286,14 @@ public class CategoryCatalogService {
 
         void name(String name) {
             this.name = name;
+        }
+
+        Long categoryId() {
+            return categoryId;
+        }
+
+        void categoryId(Long categoryId) {
+            this.categoryId = categoryId;
         }
 
         CategoryNode parent() {

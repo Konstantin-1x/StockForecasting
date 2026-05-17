@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -52,6 +53,18 @@ public class PromotionForecast {
 
     @Column(name = "promotion_stock_forecast")
     private Integer promotionStockForecast;
+
+    @Column(name = "promotion_budget", precision = 14, scale = 2)
+    private BigDecimal promotionBudget;
+
+    @Column(name = "recommended_discount_amount", precision = 14, scale = 2)
+    private BigDecimal recommendedDiscountAmount;
+
+    @Column(name = "recommended_discount_percent", precision = 6, scale = 2)
+    private BigDecimal recommendedDiscountPercent;
+
+    @Column(name = "predicted_sellout_hours")
+    private Integer predictedSelloutHours;
 
     @Column(name = "confidence_interval", precision = 6, scale = 2)
     private BigDecimal confidenceInterval;
@@ -133,6 +146,38 @@ public class PromotionForecast {
         this.promotionStockForecast = promotionStockForecast;
     }
 
+    public BigDecimal getPromotionBudget() {
+        return promotionBudget;
+    }
+
+    public void setPromotionBudget(BigDecimal promotionBudget) {
+        this.promotionBudget = promotionBudget;
+    }
+
+    public BigDecimal getRecommendedDiscountAmount() {
+        return recommendedDiscountAmount;
+    }
+
+    public void setRecommendedDiscountAmount(BigDecimal recommendedDiscountAmount) {
+        this.recommendedDiscountAmount = recommendedDiscountAmount;
+    }
+
+    public BigDecimal getRecommendedDiscountPercent() {
+        return recommendedDiscountPercent;
+    }
+
+    public void setRecommendedDiscountPercent(BigDecimal recommendedDiscountPercent) {
+        this.recommendedDiscountPercent = recommendedDiscountPercent;
+    }
+
+    public Integer getPredictedSelloutHours() {
+        return predictedSelloutHours;
+    }
+
+    public void setPredictedSelloutHours(Integer predictedSelloutHours) {
+        this.predictedSelloutHours = predictedSelloutHours;
+    }
+
     public BigDecimal getConfidenceInterval() {
         return confidenceInterval;
     }
@@ -170,17 +215,23 @@ public class PromotionForecast {
     }
 
     public String getDisplayProductName() {
+        if (product != null && product.getName() != null && !product.getName().isBlank()) {
+            return product.getName();
+        }
         if (trackedProduct != null && trackedProduct.getProductName() != null && !trackedProduct.getProductName().isBlank()) {
             return trackedProduct.getProductName();
         }
-        return product == null ? "" : product.getName();
+        return "";
     }
 
     public String getDisplayMarketplaceArticle() {
+        if (product != null && product.getMarketplaceArticle() != null && !product.getMarketplaceArticle().isBlank()) {
+            return product.getMarketplaceArticle();
+        }
         if (trackedProduct != null && trackedProduct.getMarketplaceArticle() != null && !trackedProduct.getMarketplaceArticle().isBlank()) {
             return trackedProduct.getMarketplaceArticle();
         }
-        return product == null ? "" : product.getMarketplaceArticle();
+        return "";
     }
 
     public String getPromotionStartLabel() {
@@ -203,11 +254,48 @@ public class PromotionForecast {
         return promotionStockForecast == null ? "" : String.valueOf(promotionStockForecast);
     }
 
+    public String getPromotionBudgetLabel() {
+        return moneyLabel(promotionBudget);
+    }
+
+    public String getPromotionCostForecastLabel() {
+        return moneyLabel(promotionCostForecast);
+    }
+
+    public String getRecommendedDiscountLabel() {
+        if (recommendedDiscountAmount == null && recommendedDiscountPercent == null) {
+            return "";
+        }
+        String amount = recommendedDiscountAmount == null ? "0" : recommendedDiscountAmount.stripTrailingZeros().toPlainString();
+        String percent = recommendedDiscountPercent == null ? "0" : recommendedDiscountPercent.stripTrailingZeros().toPlainString();
+        return amount + " ₽ / " + percent + "%";
+    }
+
+    public String getPredictedSelloutLabel() {
+        if (predictedSelloutHours == null) {
+            return selloutDaysForecast == null ? "" : selloutDaysForecast + " д.";
+        }
+        int hours = Math.max(0, predictedSelloutHours);
+        int days = hours / 24;
+        int remainingHours = hours % 24;
+        if (days == 0) {
+            return hours + " ч.";
+        }
+        if (remainingHours == 0) {
+            return days + " д.";
+        }
+        return days + " д. " + remainingHours + " ч.";
+    }
+
     public String getConfidenceLabel() {
         return confidenceInterval == null ? "" : confidenceInterval.stripTrailingZeros().toPlainString() + "%";
     }
 
     public String getValidationMaeLabel() {
         return validationMae == null ? "" : validationMae.stripTrailingZeros().toPlainString();
+    }
+
+    private static String moneyLabel(BigDecimal value) {
+        return value == null ? "" : value.setScale(0, RoundingMode.HALF_UP).toPlainString() + " ₽";
     }
 }

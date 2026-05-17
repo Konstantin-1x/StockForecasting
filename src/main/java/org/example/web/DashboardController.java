@@ -1,10 +1,12 @@
 package org.example.web;
 
+import jakarta.validation.Valid;
 import org.example.domain.CompetitorOffer;
 import org.example.forecast.NeuralForecastJobService;
 import org.example.parser.wb.WildberriesImportResult;
 import org.example.parser.wb.WildberriesParserService;
 import org.example.repository.CompetitorOfferRepository;
+import org.example.repository.AppUserRepository;
 import org.example.repository.ProductCategoryRepository;
 import org.example.repository.ProductRepository;
 import org.example.repository.PromotionForecastRepository;
@@ -15,7 +17,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -33,10 +37,12 @@ public class DashboardController {
     private final PromotionRepository promotionRepository;
     private final PromotionForecastRepository forecastRepository;
     private final CompetitorOfferRepository offerRepository;
+    private final AppUserRepository userRepository;
     private final WildberriesParserService parserService;
     private final CategoryCatalogService categoryCatalogService;
     private final ForecastDataQualityService forecastDataQualityService;
     private final NeuralForecastJobService neuralForecastJobService;
+    private final LandingPageContentService landingPageContentService;
 
     public DashboardController(SellerRepository sellerRepository,
                                ProductRepository productRepository,
@@ -44,37 +50,82 @@ public class DashboardController {
                                PromotionRepository promotionRepository,
                                PromotionForecastRepository forecastRepository,
                                CompetitorOfferRepository offerRepository,
+                               AppUserRepository userRepository,
                                WildberriesParserService parserService,
                                CategoryCatalogService categoryCatalogService,
                                ForecastDataQualityService forecastDataQualityService,
-                               NeuralForecastJobService neuralForecastJobService) {
+                               NeuralForecastJobService neuralForecastJobService,
+                               LandingPageContentService landingPageContentService) {
         this.sellerRepository = sellerRepository;
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.promotionRepository = promotionRepository;
         this.forecastRepository = forecastRepository;
         this.offerRepository = offerRepository;
+        this.userRepository = userRepository;
         this.parserService = parserService;
         this.categoryCatalogService = categoryCatalogService;
         this.forecastDataQualityService = forecastDataQualityService;
         this.neuralForecastJobService = neuralForecastJobService;
+        this.landingPageContentService = landingPageContentService;
     }
 
     @GetMapping("/")
-    public String dashboard(Model model) {
-        model.addAttribute("sellerCount", sellerRepository.count());
-        model.addAttribute("productCount", productRepository.count());
-        model.addAttribute("categoryCount", categoryRepository.count());
-        model.addAttribute("promotionCount", promotionRepository.count());
-        model.addAttribute("forecastCount", forecastRepository.count());
-        model.addAttribute("offerCount", offerRepository.count());
-        model.addAttribute("latestOffers", offerRepository.findAll(
-                PageRequest.of(0, 8, Sort.by(Sort.Direction.DESC, "collectedAt"))
-        ));
-        return "dashboard";
+    public String home(Model model) {
+        model.addAttribute("landingPage", landingPageContentService.currentContent());
+        return "home";
+    }
+
+    @GetMapping("/admin/home/edit")
+    public String editHome(Model model) {
+        if (!model.containsAttribute("landingPageForm")) {
+            model.addAttribute("landingPageForm", landingPageContentService.toForm());
+        }
+        return "home-edit";
+    }
+
+    @PostMapping("/admin/home/edit")
+    public String updateHome(@Valid @ModelAttribute("landingPageForm") LandingPageForm form,
+                             BindingResult bindingResult,
+                             RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            return "home-edit";
+        }
+
+        landingPageContentService.update(form);
+        redirectAttributes.addFlashAttribute("status", "Стартовая страница обновлена.");
+        return "redirect:/";
+    }
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
     }
 
     @GetMapping("/offers")
+    public String legacyOffers(@RequestParam(required = false) String categoryKey,
+                               @RequestParam(required = false) Integer page,
+                               RedirectAttributes redirectAttributes) {
+        if (categoryKey != null && !categoryKey.isBlank()) {
+            redirectAttributes.addAttribute("categoryKey", categoryKey);
+        }
+        if (page != null && page > 0) {
+            redirectAttributes.addAttribute("page", page);
+        }
+        return "redirect:/admin/offers";
+    }
+
+    @GetMapping("/products")
+    public String legacyProducts() {
+        return "redirect:/admin/products";
+    }
+
+    @GetMapping("/forecasts")
+    public String legacyForecasts() {
+        return "redirect:/admin/forecasts";
+    }
+
+    @GetMapping("/admin/offers")
     public String offers(@RequestParam(required = false) String categoryKey,
                          @RequestParam(defaultValue = "0") Integer page,
                          Model model) {
@@ -101,13 +152,13 @@ public class DashboardController {
         return "offers";
     }
 
-    @GetMapping("/products")
+    @GetMapping("/admin/products")
     public String products(Model model) {
         model.addAttribute("products", productRepository.findAll(Sort.by(Sort.Direction.DESC, "id")));
         return "products";
     }
 
-    @GetMapping("/forecasts")
+    @GetMapping("/admin/forecasts")
     public String forecasts(Model model) {
         model.addAttribute("forecasts", forecastRepository.findAll(Sort.by(Sort.Direction.DESC, "calculatedAt")));
         model.addAttribute("neuralForecastJobStatus", neuralForecastJobService.currentStatus());
@@ -121,6 +172,7 @@ public class DashboardController {
         model.addAttribute("offerCount", offerRepository.count());
         model.addAttribute("forecastCount", forecastRepository.count());
         model.addAttribute("categoryCount", categoryRepository.count());
+        model.addAttribute("userCount", userRepository.count());
         model.addAttribute("latestOffers", offerRepository.findAll(
                 PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "collectedAt"))
         ));
@@ -129,7 +181,7 @@ public class DashboardController {
         return "admin";
     }
 
-    @PostMapping("/parser/import")
+    @PostMapping({"/admin/parser/import", "/parser/import"})
     public String importWildberries(@RequestParam(defaultValue = "3") Integer maxCategories,
                                     @RequestParam(defaultValue = "1") Integer maxPagesPerCategory,
                                     RedirectAttributes redirectAttributes) {
@@ -143,7 +195,7 @@ public class DashboardController {
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", "Импорт не выполнен: " + e.getMessage());
         }
-        return "redirect:/offers";
+        return "redirect:/admin/offers";
     }
 
     @PostMapping("/admin/forecasts/recalculate")
@@ -154,7 +206,7 @@ public class DashboardController {
         } else {
             redirectAttributes.addFlashAttribute("status", "Нейросетевой пересчет уже выполняется.");
         }
-        return "redirect:/forecasts";
+        return "redirect:/admin/forecasts";
     }
 
     private static List<Integer> pageNumbers(Page<?> page) {

@@ -23,6 +23,24 @@ public class Seller {
     @Column(name = "shop_name", nullable = false, length = 150)
     private String shopName;
 
+    @Column(name = "contact_name", length = 150)
+    private String contactName;
+
+    @Column(name = "contact_email", length = 180)
+    private String contactEmail;
+
+    @Column(name = "contact_phone", length = 60)
+    private String contactPhone;
+
+    @Column(name = "tax_id", length = 40)
+    private String taxId;
+
+    @Column(name = "marketplace_seller_id", length = 100)
+    private String marketplaceSellerId;
+
+    @Column(name = "seller_notes", length = 2000)
+    private String notes;
+
     @Column(name = "registration_date", nullable = false)
     private LocalDate registrationDate = LocalDate.now();
 
@@ -40,6 +58,54 @@ public class Seller {
 
     public void setShopName(String shopName) {
         this.shopName = shopName;
+    }
+
+    public String getContactName() {
+        return contactName;
+    }
+
+    public void setContactName(String contactName) {
+        this.contactName = contactName;
+    }
+
+    public String getContactEmail() {
+        return contactEmail;
+    }
+
+    public void setContactEmail(String contactEmail) {
+        this.contactEmail = contactEmail;
+    }
+
+    public String getContactPhone() {
+        return contactPhone;
+    }
+
+    public void setContactPhone(String contactPhone) {
+        this.contactPhone = contactPhone;
+    }
+
+    public String getTaxId() {
+        return taxId;
+    }
+
+    public void setTaxId(String taxId) {
+        this.taxId = taxId;
+    }
+
+    public String getMarketplaceSellerId() {
+        return marketplaceSellerId;
+    }
+
+    public void setMarketplaceSellerId(String marketplaceSellerId) {
+        this.marketplaceSellerId = marketplaceSellerId;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 
     public LocalDate getRegistrationDate() {

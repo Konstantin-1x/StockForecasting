@@ -7,7 +7,9 @@
             <h1>Панель управления</h1>
             <p>Сводка по данным системы прогнозирования и последним предложениям, полученным парсером.</p>
         </div>
-        <form class="form-inline" th:action="@{/parser/import}" method="post">
+        <form class="form-inline" th:action="@{/admin/parser/import}" method="post">
+            <input th:if="${_csrf != null}" type="hidden"
+                   th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <input class="input" type="number" name="maxCategories" min="1" max="500" value="3" title="Категории">
             <input class="input" type="number" name="maxPagesPerCategory" min="1" max="100" value="1" title="Страницы">
             <button class="btn" type="submit">Запустить парсер</button>
@@ -39,7 +41,7 @@
                 <div class="table-toolbar__title">Последние предложения</div>
                 <div class="table-toolbar__hint">Данные берутся напрямую из таблицы конкурентных предложений.</div>
             </div>
-            <a class="btn btn--soft" th:href="@{/offers}">Открыть все</a>
+            <a class="btn btn--soft" th:href="@{/admin/offers}">Открыть все</a>
         </div>
         <div class="table-wrap" th:if="${!latestOffers.isEmpty()}">
             <table>

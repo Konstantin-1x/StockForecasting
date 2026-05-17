@@ -15,7 +15,7 @@
                 <div class="catalog-panel__title">Каталог</div>
                 <a class="catalog-reset"
                    th:classappend="${selectedCategoryKey == null} ? ' catalog-reset--active'"
-                   th:href="@{/offers}">Все товары</a>
+                   th:href="@{/admin/offers}">Все товары</a>
             </div>
 
             <div class="catalog-menu">
@@ -23,7 +23,7 @@
                      th:each="category : ${catalog.rootCategories}"
                      th:classappend="${category.selected || category.activeTrail} ? ' catalog-root--active'">
                     <a class="catalog-link"
-                       th:href="@{/offers(categoryKey=${category.key})}"
+                       th:href="@{/admin/offers(categoryKey=${category.key})}"
                        th:classappend="${category.selected || category.activeTrail} ? ' catalog-link--active'">
                         <span th:text="${category.name}">Категория</span>
                         <span class="catalog-link__arrow" th:if="${category.hasChildren}">›</span>
@@ -31,7 +31,7 @@
                     <div class="catalog-flyout" th:if="${!category.children.isEmpty()}">
                         <a class="catalog-link catalog-link--child"
                            th:each="child : ${category.children}"
-                           th:href="@{/offers(categoryKey=${child.key})}"
+                           th:href="@{/admin/offers(categoryKey=${child.key})}"
                            th:style="'--depth: ' + ${child.depth}"
                            th:classappend="${child.selected || child.activeTrail} ? ' catalog-link--active'">
                             <span th:text="${child.name}">Подкатегория</span>
@@ -99,7 +99,7 @@
             <nav class="pagination" th:if="${offerPage.totalPages > 1}">
                 <a class="pagination__link"
                    th:if="${!offerPage.first}"
-                   th:href="@{/offers(page=${offerPage.number - 1}, categoryKey=${selectedCategoryKey})}">Назад</a>
+                   th:href="@{/admin/offers(page=${offerPage.number - 1}, categoryKey=${selectedCategoryKey})}">Назад</a>
                 <span class="pagination__link pagination__link--disabled" th:if="${offerPage.first}">Назад</span>
 
                 <div class="pagination__pages">
@@ -109,14 +109,14 @@
                               th:text="${pageNumber + 1}">1</span>
                         <a class="pagination__link"
                            th:if="${pageNumber != offerPage.number}"
-                           th:href="@{/offers(page=${pageNumber}, categoryKey=${selectedCategoryKey})}"
+                           th:href="@{/admin/offers(page=${pageNumber}, categoryKey=${selectedCategoryKey})}"
                            th:text="${pageNumber + 1}">2</a>
                     </th:block>
                 </div>
 
                 <a class="pagination__link"
                    th:if="${!offerPage.last}"
-                   th:href="@{/offers(page=${offerPage.number + 1}, categoryKey=${selectedCategoryKey})}">Вперед</a>
+                   th:href="@{/admin/offers(page=${offerPage.number + 1}, categoryKey=${selectedCategoryKey})}">Вперед</a>
                 <span class="pagination__link pagination__link--disabled" th:if="${offerPage.last}">Вперед</span>
             </nav>
         </section>

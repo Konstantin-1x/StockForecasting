@@ -4,6 +4,7 @@ import java.util.List;
 
 public record CategoryCatalogItem(
         String key,
+        Long categoryId,
         String name,
         int depth,
         boolean selected,

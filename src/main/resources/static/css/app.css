@@ -83,11 +83,35 @@ a {
     color: #ffffff;
 }
 
+.sidebar-tools {
+    display: grid;
+    gap: 4px;
+    margin-top: auto;
+    padding: 10px 12px 0;
+}
+
+.sidebar-tools__label {
+    padding: 0 12px 2px;
+    color: #9ca3af;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.nav__link--tool {
+    border: 0;
+    background: transparent;
+}
+
 .sidebar__footer {
     margin-top: auto;
     padding: 18px 20px;
     color: #9ca3af;
     font-size: 12px;
+}
+
+.sidebar-tools + .sidebar__footer {
+    margin-top: 0;
 }
 
 .content {
@@ -117,6 +141,19 @@ a {
     font-weight: 700;
 }
 
+.topbar__actions,
+.logout-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.topbar__user {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
 .page {
     padding: 28px 0 44px;
 }
@@ -139,6 +176,13 @@ a {
     margin: 7px 0 0;
     color: var(--muted);
     font-size: 14px;
+}
+
+.page-actions,
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .grid {
@@ -178,6 +222,16 @@ a {
     margin-top: 8px;
     font-size: 30px;
     font-weight: 780;
+}
+
+.metric__value--text {
+    font-size: 20px;
+    line-height: 1.2;
+}
+
+.metric--link:hover {
+    border-color: #b7c5df;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
 }
 
 .admin-grid {
@@ -499,6 +553,11 @@ tr:hover td {
     background: var(--brand-dark);
 }
 
+.btn:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+}
+
 .btn--soft {
     border: 1px solid var(--line);
     background: #ffffff;
@@ -531,6 +590,32 @@ tr:hover td {
     background: #ffffff;
     color: var(--ink);
     font: inherit;
+}
+
+.import-form .input {
+    width: 100%;
+}
+
+.text-input {
+    width: 100%;
+    height: 42px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0 12px;
+    background: #ffffff;
+    color: var(--ink);
+    font: inherit;
+}
+
+select.text-input {
+    cursor: pointer;
+}
+
+.text-input:focus,
+.input:focus,
+.file-input:focus {
+    border-color: var(--brand);
+    outline: 3px solid rgba(37, 99, 235, 0.14);
 }
 
 .badge {
@@ -578,6 +663,325 @@ tr:hover td {
     padding: 42px 16px;
     text-align: center;
     color: var(--muted);
+}
+
+.public-page {
+    min-height: 100vh;
+    background:
+            linear-gradient(135deg, rgba(37, 99, 235, 0.06), rgba(4, 120, 87, 0.06)),
+            #f7f8fb;
+}
+
+.public-shell,
+.auth-shell {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 18px;
+}
+
+.public-shell--wide,
+.auth-shell--wide {
+    align-items: flex-start;
+}
+
+.public-shell--wide {
+    display: grid;
+    align-content: center;
+    gap: 18px;
+    width: min(1160px, calc(100vw - 36px));
+    margin: 0 auto;
+}
+
+.public-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+    gap: 22px;
+    width: 100%;
+}
+
+.public-hero__content,
+.public-summary,
+.public-feature,
+.auth-card {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 34px;
+    background: #ffffff;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+}
+
+.public-hero__content {
+    min-height: 360px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.public-summary {
+    align-self: stretch;
+    display: grid;
+    align-content: center;
+    gap: 14px;
+    background: #111827;
+    color: #ffffff;
+}
+
+.summary-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    padding-bottom: 14px;
+}
+
+.summary-row:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+.summary-row span {
+    color: #cbd5e1;
+    font-size: 13px;
+}
+
+.summary-row strong {
+    font-size: 20px;
+}
+
+.public-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.public-feature {
+    padding: 22px;
+}
+
+.public-feature h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.public-feature p {
+    margin: 8px 0 0;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+.auth-card {
+    width: min(430px, 100%);
+}
+
+.auth-card--wide {
+    width: min(920px, 100%);
+}
+
+.public-kicker {
+    color: var(--brand);
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.public-hero h1,
+.auth-card h1 {
+    margin: 10px 0 0;
+    font-size: 42px;
+    line-height: 1.12;
+}
+
+.auth-card h1 {
+    font-size: 28px;
+}
+
+.public-hero p,
+.auth-card p {
+    margin: 12px 0 0;
+    color: var(--muted);
+    line-height: 1.55;
+}
+
+.public-hero p {
+    max-width: 720px;
+    font-size: 17px;
+}
+
+.public-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.auth-card__header {
+    margin-bottom: 20px;
+}
+
+.auth-form {
+    display: grid;
+    gap: 11px;
+}
+
+.auth-form--grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.field-group {
+    display: grid;
+    gap: 7px;
+}
+
+.form-wide {
+    grid-column: 1 / -1;
+}
+
+.form-section {
+    margin-top: 8px;
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+    color: #0f172a;
+    font-weight: 800;
+}
+
+.auth-form .btn {
+    margin-top: 6px;
+    width: 100%;
+}
+
+.auth-links {
+    margin-top: 18px;
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+}
+
+.auth-links a:hover {
+    color: var(--brand);
+}
+
+.demo-credentials {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 16px;
+    border: 1px solid #dbeafe;
+    border-radius: 8px;
+    padding: 12px;
+    background: #eff6ff;
+}
+
+.demo-credentials__title {
+    grid-column: 1 / -1;
+    color: #1e40af;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.demo-credentials span {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.demo-credentials strong {
+    display: block;
+    margin-top: 3px;
+    color: #0f172a;
+    font-size: 14px;
+}
+
+.error-card {
+    text-align: center;
+}
+
+.error-card .public-actions {
+    justify-content: center;
+}
+
+.error-code {
+    color: var(--brand);
+    font-size: 58px;
+    line-height: 1;
+    font-weight: 850;
+}
+
+.text-area {
+    min-height: 96px;
+    padding-top: 11px;
+    resize: vertical;
+}
+
+.text-area--large {
+    min-height: 128px;
+}
+
+.selected-category {
+    display: grid;
+    gap: 5px;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    padding: 12px;
+    background: #eff6ff;
+}
+
+.selected-category--empty {
+    border-color: #fde68a;
+    background: #fffbeb;
+}
+
+.selected-category span {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.selected-category strong {
+    font-size: 15px;
+}
+
+.selected-category small {
+    color: var(--muted);
+    overflow-wrap: anywhere;
+}
+
+.status-line {
+    margin-top: 12px;
+    margin-bottom: 0;
+    font-size: 13px;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.details-grid div {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 11px 12px;
+    background: #fbfcff;
+}
+
+.details-grid span {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.details-grid strong {
+    display: block;
+    margin-top: 4px;
+    overflow-wrap: anywhere;
+    font-size: 14px;
 }
 
 .pagination {
@@ -653,6 +1057,13 @@ tr:hover td {
         grid-template-columns: 1fr;
     }
 
+    .public-hero,
+    .public-feature-grid,
+    .auth-form--grid,
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+
     .catalog-panel {
         position: static;
         max-height: none;
@@ -682,7 +1093,11 @@ tr:hover td {
 
     .page-head,
     .table-toolbar,
-    .form-inline {
+    .form-inline,
+    .topbar__inner,
+    .topbar__actions,
+    .logout-form,
+    .public-actions {
         align-items: stretch;
         flex-direction: column;
     }
@@ -700,5 +1115,15 @@ tr:hover td {
 
     .pagination__pages {
         flex-wrap: wrap;
+    }
+
+    .public-hero h1 {
+        font-size: 34px;
+    }
+
+    .public-hero__content,
+    .public-summary,
+    .auth-card {
+        padding: 24px;
     }
 }

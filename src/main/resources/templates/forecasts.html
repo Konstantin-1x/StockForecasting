@@ -28,7 +28,7 @@
                 <tr>
                     <th>Дата расчета</th>
                     <th>Товар</th>
-                    <th>Прогноз цены акции</th>
+                    <th>Ставка за отзыв</th>
                     <th>До начала акции</th>
                     <th>Остаток во время акции</th>
                     <th>Качество модели</th>
@@ -41,7 +41,7 @@
                         <div class="strong" th:text="${forecast.displayProductName}">Название товара</div>
                         <div class="muted" th:text="${'Артикул WB: ' + forecast.displayMarketplaceArticle}">Артикул WB</div>
                     </td>
-                    <td th:text="${forecast.promotionCostForecast} + ' ₽'">0 ₽</td>
+                    <td th:text="${forecast.promotionCostForecastLabel}">0 ₽</td>
                     <td th:text="${forecast.promotionStartLabel}">0 ч.</td>
                     <td th:text="${forecast.promotionStockLabel}">0</td>
                     <td>
