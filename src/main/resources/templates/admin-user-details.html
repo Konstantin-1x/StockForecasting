@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout('Профиль пользователя', 'users', ~{::main})}">
+<main>
+    <section class="page-head">
+        <div>
+            <h1 th:text="${profileUser.displayName}">Пользователь</h1>
+            <p th:text="${'Логин: ' + profileUser.username + ', роль: ' + profileUser.role}">Логин</p>
+        </div>
+        <a class="btn btn--soft" th:href="@{/admin/users}">К списку</a>
+    </section>
+
+    <section class="grid grid--2">
+        <div class="card action-card">
+            <div class="action-card__head">
+                <div>
+                    <h2>Данные пользователя</h2>
+                    <p>Контакты учетной записи и состояние доступа.</p>
+                </div>
+                <span class="badge" th:classappend="${profileUser.enabled} ? ' badge--ok' : ' badge--warn'"
+                      th:text="${profileUser.enabled} ? 'Активен' : 'Отключен'">Активен</span>
+            </div>
+            <div class="details-grid">
+                <div><span>Email</span><strong th:text="${profileUser.email}">email</strong></div>
+                <div><span>Телефон</span><strong th:text="${profileUser.phone ?: '-'}">-</strong></div>
+                <div><span>Создан</span><strong th:text="${profileUser.createdAt}">date</strong></div>
+            </div>
+        </div>
+
+        <div class="card action-card">
+            <div class="action-card__head">
+                <div>
+                    <h2 th:text="${seller != null ? seller.shopName : 'Продавец не заполнен'}">Продавец</h2>
+                    <p th:text="${seller != null ? (seller.notes ?: 'Карточка продавца создана при регистрации.') : 'У пользователя нет связанного продавца.'}">Описание</p>
+                </div>
+                <span class="badge" th:if="${seller != null}" th:text="${seller.status}">ACTIVE</span>
+            </div>
+            <div class="details-grid" th:if="${seller != null}">
+                <div><span>Контакт</span><strong th:text="${seller.contactName ?: '-'}">-</strong></div>
+                <div><span>Email</span><strong th:text="${seller.contactEmail ?: '-'}">-</strong></div>
+                <div><span>Телефон</span><strong th:text="${seller.contactPhone ?: '-'}">-</strong></div>
+                <div><span>ИНН</span><strong th:text="${seller.taxId ?: '-'}">-</strong></div>
+                <div><span>ID WB</span><strong th:text="${seller.marketplaceSellerId ?: '-'}">-</strong></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card table-card" style="margin-top: 18px;">
+        <div class="table-toolbar">
+            <div>
+                <div class="table-toolbar__title">Товары пользователя</div>
+                <div class="table-toolbar__hint">Товары берутся по продавцу, связанному с учетной записью.</div>
+            </div>
+            <span class="badge" th:text="${products.size()} + ' шт.'">0 шт.</span>
+        </div>
+        <div class="table-wrap" th:if="${!products.isEmpty()}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Категория</th>
+                    <th>Артикул</th>
+                    <th>Наименование</th>
+                    <th>Базовая цена</th>
+                    <th>Остаток</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="product : ${products}">
+                    <td th:text="${product.category.name}">Категория</td>
+                    <td class="strong" th:text="${product.marketplaceArticle}">0</td>
+                    <td th:text="${product.name}">Товар</td>
+                    <td th:text="${product.basePrice} + ' ₽'">0 ₽</td>
+                    <td th:text="${product.currentStock}">0</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="empty" th:if="${products.isEmpty()}">Товары не найдены.</div>
+    </section>
+
+    <section class="card table-card" style="margin-top: 18px;">
+        <div class="table-toolbar">
+            <div>
+                <div class="table-toolbar__title">Прогнозы пользователя</div>
+                <div class="table-toolbar__hint">Все прогнозы по товарам выбранного продавца.</div>
+            </div>
+            <span class="badge" th:text="${forecasts.size()} + ' шт.'">0 шт.</span>
+        </div>
+        <div class="table-wrap" th:if="${!forecasts.isEmpty()}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Дата</th>
+                    <th>Товар</th>
+                    <th>Ставка за отзыв</th>
+                    <th>До старта</th>
+                    <th>Остаток</th>
+                    <th>Качество</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="forecast : ${forecasts}">
+                    <td th:text="${forecast.calculatedAtLabel}">Дата</td>
+                    <td>
+                        <div class="strong" th:text="${forecast.displayProductName}">Товар</div>
+                        <div class="muted" th:text="${'WB: ' + forecast.displayMarketplaceArticle}">WB</div>
+                    </td>
+                    <td th:text="${forecast.promotionCostForecastLabel}">0 ₽</td>
+                    <td th:text="${forecast.promotionStartLabel}">0 ч.</td>
+                    <td th:text="${forecast.promotionStockLabel}">0</td>
+                    <td th:text="${forecast.confidenceLabel}">0%</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="empty" th:if="${forecasts.isEmpty()}">Прогнозы не найдены.</div>
+    </section>
+</main>
+</html>

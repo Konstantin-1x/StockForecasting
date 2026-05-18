@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout('Редактирование стартовой', 'home', ~{::main})}">
+<main>
+    <section class="page-head">
+        <div>
+            <h1>Редактирование стартовой страницы</h1>
+            <p>Измените текст первого экрана и информационные блоки, которые видят пользователи без авторизации.</p>
+        </div>
+    </section>
+
+    <section class="card action-card">
+        <form class="auth-form auth-form--grid" th:action="@{/admin/home/edit}" th:object="${landingPageForm}" method="post">
+            <input th:if="${_csrf != null}" type="hidden"
+                   th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+            <div th:if="${#fields.hasGlobalErrors()}" class="alert alert--bad form-wide"
+                 th:each="err : ${#fields.globalErrors()}" th:text="${err}">Ошибка</div>
+
+            <div class="form-section form-wide">Главный экран</div>
+            <label class="field-group">
+                <span class="field-label">Надзаголовок</span>
+                <input class="text-input" type="text" th:field="*{kicker}" required>
+            </label>
+            <label class="field-group">
+                <span class="field-label">Заголовок</span>
+                <input class="text-input" type="text" th:field="*{headline}" required>
+            </label>
+            <label class="field-group form-wide">
+                <span class="field-label">Описание</span>
+                <textarea class="text-input text-area text-area--large" th:field="*{description}" rows="5" required></textarea>
+            </label>
+
+            <div class="form-section form-wide">Сводка справа</div>
+            <label class="field-group">
+                <span class="field-label">Модель</span>
+                <input class="text-input" type="text" th:field="*{modelLabel}" required>
+            </label>
+            <label class="field-group">
+                <span class="field-label">Срез данных</span>
+                <input class="text-input" type="text" th:field="*{dataSliceLabel}" required>
+            </label>
+            <label class="field-group form-wide">
+                <span class="field-label">Источник</span>
+                <input class="text-input" type="text" th:field="*{sourceLabel}" required>
+            </label>
+
+            <div class="form-section form-wide">Информационные блоки</div>
+            <label class="field-group">
+                <span class="field-label">Заголовок блока продавца</span>
+                <input class="text-input" type="text" th:field="*{sellerTitle}" required>
+            </label>
+            <label class="field-group">
+                <span class="field-label">Заголовок блока администратора</span>
+                <input class="text-input" type="text" th:field="*{adminTitle}" required>
+            </label>
+            <label class="field-group form-wide">
+                <span class="field-label">Описание блока продавца</span>
+                <textarea class="text-input text-area" th:field="*{sellerDescription}" rows="4" required></textarea>
+            </label>
+            <label class="field-group form-wide">
+                <span class="field-label">Описание блока администратора</span>
+                <textarea class="text-input text-area" th:field="*{adminDescription}" rows="4" required></textarea>
+            </label>
+            <label class="field-group">
+                <span class="field-label">Заголовок блока исследования</span>
+                <input class="text-input" type="text" th:field="*{researchTitle}" required>
+            </label>
+            <label class="field-group form-wide">
+                <span class="field-label">Описание блока исследования</span>
+                <textarea class="text-input text-area" th:field="*{researchDescription}" rows="4" required></textarea>
+            </label>
+
+            <div class="form-actions form-wide">
+                <button class="btn" type="submit">Сохранить</button>
+                <a class="btn btn--soft" th:href="@{/}">Отмена</a>
+            </div>
+        </form>
+    </section>
+</main>
+</html>

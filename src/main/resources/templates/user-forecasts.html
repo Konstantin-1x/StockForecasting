@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout('Прогнозирование', 'user-forecasts', ~{::main})}">
+<main>
+    <section class="page-head">
+        <div>
+            <h1>Прогнозирование</h1>
+            <p>Выберите товар и бюджет промо акции: модель обучится на временных рядах похожих WB-товаров и рассчитает ставку за отзыв, план отзывов и срок акции.</p>
+        </div>
+    </section>
+
+    <section class="grid grid--3">
+        <div class="card metric">
+            <div class="metric__label">Товаров в кабинете</div>
+            <div class="metric__value" th:text="${products.size()}">0</div>
+        </div>
+        <div class="card metric">
+            <div class="metric__label">Прогнозов</div>
+            <div class="metric__value" th:text="${forecasts.size()}">0</div>
+        </div>
+        <div class="card metric">
+            <div class="metric__label">Режим</div>
+            <div class="metric__value metric__value--text">По товару</div>
+        </div>
+    </section>
+
+    <section class="card action-card" style="margin-top: 18px;">
+        <div class="action-card__head">
+            <div>
+                <h2>Расчет промо сценария</h2>
+                <p>Бюджет задает ограничение промо сценария: модель подбирает ставку за отзыв и план отзывов, а срок показывает ожидаемое достижение цели. Акция WB при запуске все равно должна идти не меньше 21 дня.</p>
+            </div>
+            <span class="badge badge--ok">Ручной запуск</span>
+        </div>
+        <form class="auth-form auth-form--grid" th:action="@{/app/forecasts/recalculate}" th:object="${forecastRequestForm}" method="post">
+            <input th:if="${_csrf != null}" type="hidden"
+                   th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+            <div th:if="${#fields.hasGlobalErrors()}" class="alert alert--bad form-wide"
+                 th:each="err : ${#fields.globalErrors()}" th:text="${err}">Ошибка</div>
+
+            <label class="field-group">
+                <span class="field-label">Товар</span>
+                <select class="text-input" th:field="*{productId}" required>
+                    <option value="">Выберите товар</option>
+                    <option th:each="product : ${products}"
+                            th:value="${product.id}"
+                            th:text="${product.name + ' · WB ' + product.marketplaceArticle}">
+                        Товар
+                    </option>
+                </select>
+            </label>
+            <label class="field-group">
+                <span class="field-label">Бюджет промо акции, ₽</span>
+                <input class="text-input" type="number" step="1" min="1" th:field="*{promotionBudget}" required>
+            </label>
+
+            <div class="form-actions form-wide">
+                <button class="btn" type="submit" th:disabled="${products.isEmpty()}">Рассчитать прогноз</button>
+                <a class="btn btn--soft" th:href="@{/app/products/new}">Добавить товар</a>
+            </div>
+        </form>
+        <p class="muted status-line">После нажатия страница дождется завершения расчета и покажет сохраненный прогноз или причину пропуска.</p>
+    </section>
+
+    <section class="card table-card" style="margin-top: 18px;">
+        <div class="table-toolbar">
+            <div>
+                <div class="table-toolbar__title">Товары для прогнозирования</div>
+                <div class="table-toolbar__hint">Можно выбрать товар здесь или в форме выше.</div>
+            </div>
+            <a class="btn btn--soft" th:href="@{/app/products}">Открыть товары</a>
+        </div>
+        <div class="table-wrap" th:if="${!products.isEmpty()}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Категория</th>
+                    <th>Артикул</th>
+                    <th>Наименование</th>
+                    <th>Цена</th>
+                    <th>Остаток</th>
+                    <th>Действие</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="product : ${products}">
+                    <td th:text="${product.category.name}">Категория</td>
+                    <td class="strong" th:text="${product.marketplaceArticle}">0</td>
+                    <td th:text="${product.name}">Товар</td>
+                    <td th:text="${product.basePrice} + ' ₽'">0 ₽</td>
+                    <td th:text="${product.currentStock}">0</td>
+                    <td><a class="btn btn--soft btn--sm" th:href="@{/app/forecasts(productId=${product.id})}">Выбрать в форме</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="empty" th:if="${products.isEmpty()}">Добавьте товар, чтобы рассчитать промо сценарий.</div>
+    </section>
+
+    <section class="card table-card" style="margin-top: 18px;">
+        <div class="table-toolbar">
+            <div>
+                <div class="table-toolbar__title">Прогнозы продавца</div>
+                <div class="table-toolbar__hint">Последние сохраненные расчеты по вашим товарам.</div>
+            </div>
+        </div>
+        <div class="table-wrap" th:if="${!forecasts.isEmpty()}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Дата расчета</th>
+                    <th>Товар</th>
+                    <th>Бюджет</th>
+                    <th>Ставка за отзыв</th>
+                    <th>План отзывов</th>
+                    <th>Ожидаемый сбор</th>
+                    <th>Остаток</th>
+                    <th>Качество модели</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="forecast : ${forecasts}">
+                    <td th:text="${forecast.calculatedAtLabel}">14.05.2026 12:00</td>
+                    <td>
+                        <div class="strong" th:text="${forecast.displayProductName}">Название товара</div>
+                        <div class="muted" th:text="${'Артикул WB: ' + forecast.displayMarketplaceArticle}">Артикул WB</div>
+                    </td>
+                    <td th:text="${forecast.promotionBudgetLabel ?: '-'}">0 ₽</td>
+                    <td th:text="${forecast.promotionCostForecastLabel}">0 ₽</td>
+                    <td th:text="${forecast.promotionPurchaseForecast ?: '-'}">0</td>
+                    <td th:text="${forecast.predictedSelloutLabel}">0 д.</td>
+                    <td th:text="${forecast.promotionStockLabel}">0</td>
+                    <td>
+                        <div class="strong" th:text="${forecast.confidenceLabel}">0%</div>
+                        <div class="muted" th:if="${forecast.forecastModel}" th:text="${forecast.forecastModel}">mlp-neural-promo-v2</div>
+                        <div class="muted" th:if="${forecast.validationMae}" th:text="${'MAE: ' + forecast.validationMaeLabel}">MAE: 0.0000</div>
+                        <div class="muted" th:if="${forecast.trainingSampleCount}" th:text="${'Обучающих примеров: ' + forecast.trainingSampleCount}">Обучающих примеров: 0</div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="empty" th:if="${forecasts.isEmpty()}">Для ваших товаров пока нет прогнозов. Выберите товар, укажите бюджет промо акции и запустите расчет.</div>
+    </section>
+</main>
+</html>

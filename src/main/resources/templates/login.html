@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Вход - Промо Прогноз</title>
+    <link rel="stylesheet" th:href="@{/css/app.css(v='20260517-1')}">
+</head>
+<body class="public-page">
+<main class="auth-shell">
+    <section class="auth-card">
+        <div class="auth-card__header">
+            <div class="public-kicker">Личный кабинет</div>
+            <h1>Вход в систему</h1>
+            <p>Администратор управляет данными и пользователями, продавец видит свой профиль, товары и прогнозы.</p>
+        </div>
+
+        <div th:if="${status}" class="alert alert--ok" th:text="${status}"></div>
+        <div th:if="${param.error}" class="alert alert--bad">Неверный логин или пароль.</div>
+        <div th:if="${param.logout}" class="alert alert--ok">Вы вышли из системы.</div>
+
+        <form class="auth-form" th:action="@{/login}" method="post">
+            <input th:if="${_csrf != null}" type="hidden"
+                   th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+            <label class="field-label" for="username">Логин</label>
+            <input class="text-input" id="username" type="text" name="username" autocomplete="username" required autofocus>
+
+            <label class="field-label" for="password">Пароль</label>
+            <input class="text-input" id="password" type="password" name="password" autocomplete="current-password" required>
+
+            <button class="btn" type="submit">Войти</button>
+        </form>
+
+        <div class="demo-credentials">
+            <div class="demo-credentials__title">Тестовый пользователь</div>
+            <div><span>Логин</span><strong>seller_demo</strong></div>
+            <div><span>Пароль</span><strong>seller123</strong></div>
+        </div>
+
+        <div class="auth-links">
+            <a th:href="@{/register}">Создать аккаунт продавца</a>
+            <span>·</span>
+            <a th:href="@{/}">Стартовая</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

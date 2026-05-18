@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Промо Прогноз</title>
+    <link rel="stylesheet" th:href="@{/css/app.css(v='20260517-1')}">
+</head>
+<body class="public-page">
+<main class="public-shell public-shell--wide">
+    <div th:if="${status}" class="alert alert--ok" th:text="${status}"></div>
+    <section class="public-hero">
+        <div class="public-hero__content">
+            <div class="public-kicker" th:text="${landingPage.kicker}">ВКР · нейросетевое прогнозирование</div>
+            <h1 th:text="${landingPage.headline}">Промо Прогноз для продавцов Wildberries</h1>
+            <p th:text="${landingPage.description}">
+                Система собирает почасовые временные ряды товаров, хранит историю акционных показателей
+                и строит прогноз будущей цены, времени до старта акции и остатка товара.
+            </p>
+            <div class="public-actions">
+                <a class="btn" th:if="${!authenticated}" th:href="@{/register}">Зарегистрироваться</a>
+                <a class="btn btn--soft" th:if="${!authenticated}" th:href="@{/login}">Войти</a>
+                <a class="btn" th:if="${authenticated}" th:href="@{/app}">Открыть кабинет</a>
+                <a class="btn btn--soft" th:if="${adminUser}" th:href="@{/admin}">Админ-панель</a>
+                <a class="btn btn--soft" th:if="${adminUser}" th:href="@{/admin/home/edit}">Редактировать</a>
+            </div>
+        </div>
+
+        <div class="public-summary">
+            <div class="summary-row">
+                <span>Модель</span>
+                <strong th:text="${landingPage.modelLabel}">MLP</strong>
+            </div>
+            <div class="summary-row">
+                <span>Срез данных</span>
+                <strong th:text="${landingPage.dataSliceLabel}">1 час</strong>
+            </div>
+            <div class="summary-row">
+                <span>Источник</span>
+                <strong th:text="${landingPage.sourceLabel}">Wildberries</strong>
+            </div>
+        </div>
+    </section>
+
+    <section class="public-feature-grid">
+        <article class="public-feature">
+            <h2 th:text="${landingPage.sellerTitle}">Для продавца</h2>
+            <p th:text="${landingPage.sellerDescription}">Регистрация создает профиль продавца, к которому затем привязываются товары и прогнозы.</p>
+        </article>
+        <article class="public-feature">
+            <h2 th:text="${landingPage.adminTitle}">Для администратора</h2>
+            <p th:text="${landingPage.adminDescription}">Админ видит пользователей, карточки продавцов, товары, прогнозы и качество данных.</p>
+        </article>
+        <article class="public-feature">
+            <h2 th:text="${landingPage.researchTitle}">Для исследования</h2>
+            <p th:text="${landingPage.researchDescription}">История строится как временной ряд, чтобы модель обучалась на динамике цены, остатка и акции.</p>
+        </article>
+    </section>
+</main>
+</body>
+</html>

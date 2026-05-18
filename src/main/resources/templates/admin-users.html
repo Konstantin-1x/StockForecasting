@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout('Пользователи', 'users', ~{::main})}">
+<main>
+    <section class="page-head">
+        <div>
+            <h1>Пользователи и продавцы</h1>
+            <p>Администратор видит учетные записи, данные продавцов, количество товаров и прогнозов по каждому продавцу.</p>
+        </div>
+        <a class="btn btn--soft" th:href="@{/register}">Регистрация продавца</a>
+    </section>
+
+    <section class="card table-card">
+        <div class="table-wrap" th:if="${!users.isEmpty()}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Пользователь</th>
+                    <th>Роль</th>
+                    <th>Продавец</th>
+                    <th>Email</th>
+                    <th>Товары</th>
+                    <th>Прогнозы</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="row : ${users}">
+                    <td>
+                        <div class="strong" th:text="${row.user.displayName}">Имя</div>
+                        <div class="muted" th:text="${row.user.username}">login</div>
+                    </td>
+                    <td><span class="badge" th:text="${row.user.role}">USER</span></td>
+                    <td th:text="${row.user.seller != null ? row.user.seller.shopName : 'Не привязан'}">Магазин</td>
+                    <td th:text="${row.user.email}">mail</td>
+                    <td th:text="${row.productCount}">0</td>
+                    <td th:text="${row.forecastCount}">0</td>
+                    <td><a class="btn btn--soft btn--sm" th:href="@{/admin/users/{id}(id=${row.user.id})}">Открыть</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="empty" th:if="${users.isEmpty()}">Пользователи пока не созданы.</div>
+    </section>
+</main>
+</html>
