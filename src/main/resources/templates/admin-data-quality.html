@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout('Качество данных', 'data-quality', ~{::main})}">
+<main>
+    <section class="page-head">
+        <div>
+            <h1>Качество временных рядов</h1>
+            <p>Страница выполняет расширенную проверку накопленных снимков товаров. При большой базе данных расчет может занимать больше времени, поэтому он вынесен из основной административной панели.</p>
+        </div>
+        <a class="btn btn--soft" th:href="@{/admin}">Вернуться в админ-панель</a>
+    </section>
+
+    <section class="card action-card">
+        <div class="action-card__head">
+            <div>
+                <h2>Результат проверки</h2>
+                <p th:text="${'Проверено: ' + qualityReport.checkedAtLabel()}">Проверено</p>
+            </div>
+            <span class="badge badge--ok">Готово</span>
+        </div>
+
+        <div class="quality-list">
+            <div class="quality-check"
+                 th:each="check : ${qualityReport.checks}"
+                 th:classappend="${check.status == 'OK'} ? ' quality-check--ok' : (${check.status == 'WARN'} ? ' quality-check--warn' : ' quality-check--bad')">
+                <div>
+                    <div class="quality-check__title" th:text="${check.title}">Проверка</div>
+                    <div class="quality-check__details" th:text="${check.details}">Описание</div>
+                </div>
+                <div class="quality-check__value" th:text="${check.value}">0</div>
+            </div>
+        </div>
+    </section>
+</main>
+</html>
