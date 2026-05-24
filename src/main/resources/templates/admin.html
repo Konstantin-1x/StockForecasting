@@ -36,14 +36,32 @@
         <div class="card action-card">
             <div class="action-card__head">
                 <div>
-                    <h2>Перенос данных</h2>
-                    <p>Скачивание и загрузка архива через веб-интерфейс без ручных скриптов.</p>
+                    <h2>Полный перенос базы данных</h2>
+                    <p>Экспорт и импорт всех таблиц текущей схемы PostgreSQL вместе с пользователями, товарами, временными рядами, прогнозами и настройками стартовой страницы.</p>
                 </div>
-                <span class="badge badge--ok">ZIP + JSONL</span>
+                <span class="badge badge--ok">Полная БД</span>
             </div>
 
             <div class="action-card__actions">
-                <a class="btn" th:href="@{/admin/data/export}">Скачать экспорт</a>
+                <a class="btn" th:href="@{/admin/data/export}">Скачать полный экспорт</a>
+                <form class="inline-action-form"
+                      th:if="${dataCollectionStatus == null || !dataCollectionStatus.enabled()}"
+                      th:action="@{/admin/data-collection/start}" method="post">
+                    <input th:if="${_csrf != null}" type="hidden"
+                           th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button class="btn btn--soft" type="submit">Запустить сбор данных</button>
+                </form>
+                <form class="inline-action-form"
+                      th:if="${dataCollectionStatus != null && dataCollectionStatus.enabled()}"
+                      th:action="@{/admin/data-collection/stop}" method="post">
+                    <input th:if="${_csrf != null}" type="hidden"
+                           th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button class="btn btn--soft" type="submit">Остановить сбор данных</button>
+                </form>
+                <span class="badge"
+                      th:if="${dataCollectionStatus != null}"
+                      th:classappend="${dataCollectionStatus.enabled()} ? ' badge--ok' : ' badge--warn'"
+                      th:text="${dataCollectionStatus.enabled()} ? 'Сбор включен' : 'Сбор остановлен'">Сбор остановлен</span>
             </div>
 
             <form class="import-form" th:action="@{/admin/data/import}" method="post" enctype="multipart/form-data">
@@ -54,10 +72,10 @@
 
                 <label class="checkbox-line">
                     <input type="checkbox" name="confirmReplace" value="true" required>
-                    <span>Я понимаю, что импорт полностью заменит локальные данные данными из архива.</span>
+                    <span>Я понимаю, что импорт полностью заменит всю локальную базу данных данными из архива.</span>
                 </label>
 
-                <button class="btn btn--soft" type="submit">Загрузить импорт</button>
+                <button class="btn btn--soft" type="submit">Загрузить полный импорт</button>
             </form>
         </div>
 
@@ -65,23 +83,14 @@
             <div class="action-card__head">
                 <div>
                     <h2>Проверка перед прогнозированием</h2>
-                    <p>Контроль структуры, целостности, пропусков и аномалий временного ряда перед обучением модели.</p>
+                    <p>Детальный контроль структуры, целостности, пропусков и аномалий временного ряда вынесен на отдельную страницу, чтобы административная панель открывалась быстро даже при большой базе снимков.</p>
                 </div>
-                <span class="badge"
-                      th:classappend="${qualityReport.hasCriticalIssues()} ? ' badge--warn' : ' badge--ok'"
-                      th:text="${qualityReport.hasCriticalIssues()} ? 'Есть риски' : 'Готово'">Готово</span>
+                <span class="badge badge--ok">По запросу</span>
             </div>
 
-            <div class="quality-list">
-                <div class="quality-check"
-                     th:each="check : ${qualityReport.checks}"
-                     th:classappend="${check.status == 'OK'} ? ' quality-check--ok' : (${check.status == 'WARN'} ? ' quality-check--warn' : ' quality-check--bad')">
-                    <div>
-                        <div class="quality-check__title" th:text="${check.title}">Проверка</div>
-                        <div class="quality-check__details" th:text="${check.details}">Описание</div>
-                    </div>
-                    <div class="quality-check__value" th:text="${check.value}">0</div>
-                </div>
+            <div class="action-card__actions">
+                <a class="btn btn--soft" th:href="@{/admin/data-quality}">Открыть проверку качества</a>
+                <a class="btn btn--soft" th:href="@{/admin/offers}">Открыть предложения WB</a>
             </div>
         </div>
 
@@ -115,39 +124,5 @@
         </div>
     </section>
 
-    <section class="card table-card" style="margin-top: 18px;">
-        <div class="table-toolbar">
-            <div>
-                <div class="table-toolbar__title">Журнал последних собранных предложений</div>
-                <div class="table-toolbar__hint">Эта таблица показывает связь интерфейса с PostgreSQL и актуальность поступающих данных.</div>
-            </div>
-            <span class="badge badge--ok" th:text="${offerCount} + ' записей'">0 записей</span>
-        </div>
-        <div class="table-wrap" th:if="${!latestOffers.isEmpty()}">
-            <table>
-                <thead>
-                <tr>
-                    <th>Дата</th>
-                    <th>Категория</th>
-                    <th>Артикул</th>
-                    <th>Товар</th>
-                    <th>Цена</th>
-                    <th>Кешбэк</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="offer : ${latestOffers}">
-                    <td th:text="${offer.collectedAtLabel}">Дата</td>
-                    <td th:text="${offer.category.name}">Категория</td>
-                    <td class="strong" th:text="${offer.marketplaceArticle}">0</td>
-                    <td th:text="${offer.productName}">Товар</td>
-                    <td th:text="${offer.competitorPrice} + ' ₽'">0 ₽</td>
-                    <td th:text="${offer.feedbackReward} + ' ₽'">0 ₽</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="empty" th:if="${latestOffers.isEmpty()}">Журнал пуст.</div>
-    </section>
 </main>
 </html>

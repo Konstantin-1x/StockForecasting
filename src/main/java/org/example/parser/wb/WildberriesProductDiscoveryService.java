@@ -73,6 +73,10 @@ public class WildberriesProductDiscoveryService {
             log.info("Wildberries continuous discovery scan is disabled");
             return;
         }
+        if (!properties.isBaselineOnStartup()) {
+            log.info("Wildberries startup discovery scan is disabled");
+            return;
+        }
         if (transferState.isTransferInProgress()) {
             log.info("Wildberries startup discovery scan skipped: data transfer is running");
             return;

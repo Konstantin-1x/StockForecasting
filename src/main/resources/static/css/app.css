@@ -7,11 +7,11 @@
     --line: #dfe4ee;
     --side: #111827;
     --side-soft: #1f2937;
-    --brand: #2563eb;
-    --brand-dark: #1d4ed8;
+    --brand: #475569;
+    --brand-dark: #334155;
     --ok: #047857;
-    --warn: #b45309;
-    --bad: #be123c;
+    --warn: #64748b;
+    --bad: #b91c1c;
 }
 
 * {
@@ -265,7 +265,13 @@ a {
 .action-card__actions {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 10px;
+}
+
+.inline-action-form {
+    display: inline-flex;
+    margin: 0;
 }
 
 .import-form {
@@ -328,11 +334,11 @@ a {
 }
 
 .quality-check--warn {
-    border-left-color: var(--warn);
+    border-left-color: #cbd5e1;
 }
 
 .quality-check--bad {
-    border-left-color: var(--bad);
+    border-left-color: #fca5a5;
 }
 
 .quality-check__title {
@@ -538,11 +544,11 @@ tr:hover td {
     align-items: center;
     justify-content: center;
     min-height: 38px;
-    border: 0;
+    border: 1px solid #cbd5e1;
     border-radius: 8px;
     padding: 0 14px;
-    background: var(--brand);
-    color: #ffffff;
+    background: #f8fafc;
+    color: #172033;
     font: inherit;
     font-size: 14px;
     font-weight: 700;
@@ -550,7 +556,8 @@ tr:hover td {
 }
 
 .btn:hover {
-    background: var(--brand-dark);
+    border-color: #94a3b8;
+    background: #eef2f7;
 }
 
 .btn:disabled {
@@ -565,6 +572,17 @@ tr:hover td {
 }
 
 .btn--soft:hover {
+    background: #f8fafc;
+}
+
+.btn--danger {
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: var(--ink);
+}
+
+.btn--danger:hover {
+    border-color: #94a3b8;
     background: #f8fafc;
 }
 
@@ -629,14 +647,14 @@ select.text-input {
 }
 
 .badge--ok {
-    border-color: #a7f3d0;
-    background: #ecfdf5;
+    border-color: #bbf7d0;
+    background: #f0fdf4;
     color: var(--ok);
 }
 
 .badge--warn {
-    border-color: #fde68a;
-    background: #fffbeb;
+    border-color: #cbd5e1;
+    background: #f8fafc;
     color: var(--warn);
 }
 
@@ -654,9 +672,9 @@ select.text-input {
 }
 
 .alert--bad {
-    border: 1px solid #fecdd3;
-    background: #fff1f2;
-    color: var(--bad);
+    border: 1px solid #fed7aa;
+    background: #fff7ed;
+    color: #9a3412;
 }
 
 .empty {

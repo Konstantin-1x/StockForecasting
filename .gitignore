@@ -2,7 +2,7 @@
 .gradle-user/
 .gradle-user2/
 build/
-data/
+/data/
 exports/
 *.dump
 *.backup

@@ -6,6 +6,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -19,6 +20,10 @@ import java.time.format.DateTimeFormatter;
 @Entity
 @Table(
         name = "competitor_offers",
+        indexes = {
+                @Index(name = "idx_competitor_offers_collected_at", columnList = "collected_at"),
+                @Index(name = "idx_competitor_offers_category_collected", columnList = "category_id,collected_at")
+        },
         uniqueConstraints = {
                 @UniqueConstraint(name = "uk_competitor_offers_marketplace_article", columnNames = "marketplace_article")
         }

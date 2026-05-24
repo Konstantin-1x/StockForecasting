@@ -19,7 +19,9 @@ import java.time.Instant;
 @Table(
         name = "marketplace_product_snapshots",
         indexes = {
-                @Index(name = "idx_marketplace_product_snapshots_product_time", columnList = "tracked_product_id,collected_at")
+                @Index(name = "idx_marketplace_product_snapshots_product_time", columnList = "tracked_product_id,collected_at"),
+                @Index(name = "idx_marketplace_product_snapshots_collected_at", columnList = "collected_at"),
+                @Index(name = "idx_marketplace_product_snapshots_source", columnList = "measurement_source")
         }
 )
 public class MarketplaceProductSnapshot {

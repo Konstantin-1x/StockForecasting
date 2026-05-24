@@ -3,6 +3,8 @@ package org.example.web;
 import jakarta.validation.Valid;
 import org.example.domain.CompetitorOffer;
 import org.example.forecast.NeuralForecastJobService;
+import org.example.parser.wb.DataCollectionControlService;
+import org.example.parser.wb.DataCollectionStatus;
 import org.example.parser.wb.WildberriesImportResult;
 import org.example.parser.wb.WildberriesParserService;
 import org.example.repository.CompetitorOfferRepository;
@@ -43,6 +45,7 @@ public class DashboardController {
     private final ForecastDataQualityService forecastDataQualityService;
     private final NeuralForecastJobService neuralForecastJobService;
     private final LandingPageContentService landingPageContentService;
+    private final DataCollectionControlService dataCollectionControlService;
 
     public DashboardController(SellerRepository sellerRepository,
                                ProductRepository productRepository,
@@ -55,7 +58,8 @@ public class DashboardController {
                                CategoryCatalogService categoryCatalogService,
                                ForecastDataQualityService forecastDataQualityService,
                                NeuralForecastJobService neuralForecastJobService,
-                               LandingPageContentService landingPageContentService) {
+                               LandingPageContentService landingPageContentService,
+                               DataCollectionControlService dataCollectionControlService) {
         this.sellerRepository = sellerRepository;
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
@@ -68,6 +72,7 @@ public class DashboardController {
         this.forecastDataQualityService = forecastDataQualityService;
         this.neuralForecastJobService = neuralForecastJobService;
         this.landingPageContentService = landingPageContentService;
+        this.dataCollectionControlService = dataCollectionControlService;
     }
 
     @GetMapping("/")
@@ -165,20 +170,36 @@ public class DashboardController {
         return "forecasts";
     }
 
+    @GetMapping("/admin/data-quality")
+    public String dataQuality(Model model) {
+        model.addAttribute("qualityReport", forecastDataQualityService.buildReport());
+        return "admin-data-quality";
+    }
+
     @GetMapping("/admin")
     public String admin(Model model) {
         model.addAttribute("sellerCount", sellerRepository.count());
         model.addAttribute("productCount", productRepository.count());
-        model.addAttribute("offerCount", offerRepository.count());
         model.addAttribute("forecastCount", forecastRepository.count());
         model.addAttribute("categoryCount", categoryRepository.count());
         model.addAttribute("userCount", userRepository.count());
-        model.addAttribute("latestOffers", offerRepository.findAll(
-                PageRequest.of(0, 20, Sort.by(Sort.Direction.DESC, "collectedAt"))
-        ));
-        model.addAttribute("qualityReport", forecastDataQualityService.buildReport());
         model.addAttribute("neuralForecastJobStatus", neuralForecastJobService.currentStatus());
+        model.addAttribute("dataCollectionStatus", dataCollectionControlService.currentStatus());
         return "admin";
+    }
+
+    @PostMapping("/admin/data-collection/start")
+    public String startDataCollection(RedirectAttributes redirectAttributes) {
+        DataCollectionStatus status = dataCollectionControlService.startCollection();
+        redirectAttributes.addFlashAttribute("status", status.message());
+        return "redirect:/admin";
+    }
+
+    @PostMapping("/admin/data-collection/stop")
+    public String stopDataCollection(RedirectAttributes redirectAttributes) {
+        DataCollectionStatus status = dataCollectionControlService.stopCollection();
+        redirectAttributes.addFlashAttribute("status", status.message());
+        return "redirect:/admin";
     }
 
     @PostMapping({"/admin/parser/import", "/parser/import"})
