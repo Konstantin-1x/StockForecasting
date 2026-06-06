@@ -1,0 +1,93 @@
+[
+  {
+    "label": "Стартовая страница",
+    "route": "/",
+    "status": 200,
+    "wallTimeMs": 531,
+    "navigation": {
+      "domContentLoadedMs": 11,
+      "loadEventMs": 13,
+      "transferSize": 2989,
+      "encodedBodySize": 2689,
+      "decodedBodySize": 2689
+    }
+  },
+  {
+    "label": "Форма входа",
+    "route": "/login",
+    "status": 200,
+    "wallTimeMs": 531,
+    "navigation": {
+      "domContentLoadedMs": 9,
+      "loadEventMs": 15,
+      "transferSize": 2508,
+      "encodedBodySize": 2208,
+      "decodedBodySize": 2208
+    }
+  },
+  {
+    "label": "Страница неправильной ссылки",
+    "route": "/this-page-does-not-exist",
+    "status": 404,
+    "wallTimeMs": 528,
+    "navigation": {
+      "domContentLoadedMs": 12,
+      "loadEventMs": 14,
+      "transferSize": 1179,
+      "encodedBodySize": 879,
+      "decodedBodySize": 879
+    }
+  },
+  {
+    "label": "Административная панель",
+    "route": "/admin",
+    "status": 200,
+    "wallTimeMs": 538,
+    "navigation": {
+      "domContentLoadedMs": 15,
+      "loadEventMs": 21,
+      "transferSize": 9631,
+      "encodedBodySize": 9331,
+      "decodedBodySize": 9331
+    }
+  },
+  {
+    "label": "Страница товаров продавца",
+    "route": "/app/products",
+    "status": 200,
+    "wallTimeMs": 531,
+    "navigation": {
+      "domContentLoadedMs": 16,
+      "loadEventMs": 18,
+      "transferSize": 8898,
+      "encodedBodySize": 8598,
+      "decodedBodySize": 8598
+    }
+  },
+  {
+    "label": "Форма добавления товара",
+    "route": "/app/products/new",
+    "status": 200,
+    "wallTimeMs": 687,
+    "navigation": {
+      "domContentLoadedMs": 176,
+      "loadEventMs": 178,
+      "transferSize": 975892,
+      "encodedBodySize": 975592,
+      "decodedBodySize": 975592
+    }
+  },
+  {
+    "label": "Страница прогнозирования",
+    "route": "/app/forecasts",
+    "status": 200,
+    "wallTimeMs": 544,
+    "navigation": {
+      "domContentLoadedMs": 24,
+      "loadEventMs": 42,
+      "transferSize": 14486,
+      "encodedBodySize": 14186,
+      "decodedBodySize": 14186
+    }
+  }
+]

@@ -1,0 +1,81 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: stockforecasting-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-stockforecasting}
+      POSTGRES_USER: ${DB_USERNAME:-stockforecasting}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin}
+      TZ: ${TZ:-Europe/Moscow}
+    volumes:
+      - stockforecasting-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-stockforecasting} -d ${DB_NAME:-stockforecasting}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: stockforecasting-app:local
+    container_name: stockforecasting-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${SERVER_PORT:-8080}:8080"
+    environment:
+      TZ: ${TZ:-Europe/Moscow}
+      JAVA_OPTS: ${JAVA_OPTS:--Xms512m -Xmx2g -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8}
+      SERVER_PORT: 8080
+      DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-stockforecasting}
+      DB_USERNAME: ${DB_USERNAME:-stockforecasting}
+      DB_PASSWORD: ${DB_PASSWORD:-admin}
+      DB_POOL_MAX_SIZE: ${DB_POOL_MAX_SIZE:-70}
+      DB_POOL_MIN_IDLE: ${DB_POOL_MIN_IDLE:-5}
+      DB_CONNECTION_TIMEOUT_MS: ${DB_CONNECTION_TIMEOUT_MS:-120000}
+      DATA_IMPORT_MAX_FILE_SIZE: ${DATA_IMPORT_MAX_FILE_SIZE:-2GB}
+      DATA_IMPORT_MAX_REQUEST_SIZE: ${DATA_IMPORT_MAX_REQUEST_SIZE:-2GB}
+      APP_ADMIN_USERNAME: ${APP_ADMIN_USERNAME:-admin}
+      APP_ADMIN_PASSWORD: ${APP_ADMIN_PASSWORD:-admin}
+      WB_COOKIE_FILE: /app/cookie.txt
+      WB_PROXY_FILE: ${WB_PROXY_FILE:-/app/proxies.txt}
+      WB_PROXY_USERNAME: ${WB_PROXY_USERNAME:-}
+      WB_PROXY_PASSWORD: ${WB_PROXY_PASSWORD:-}
+      WB_PROXY_SECURE: ${WB_PROXY_SECURE:-true}
+      WB_PROXY_ENABLED: ${WB_PROXY_ENABLED:-true}
+      WB_PROXY_MAX_ATTEMPTS: ${WB_PROXY_MAX_ATTEMPTS:-10}
+      WB_PROXY_FAILURE_COOLDOWN: ${WB_PROXY_FAILURE_COOLDOWN:-5m}
+      WB_PROXY_REQUEST_TIMEOUT: ${WB_PROXY_REQUEST_TIMEOUT:-8s}
+      WB_PROXY_HEALTH_CHECK_ENABLED: ${WB_PROXY_HEALTH_CHECK_ENABLED:-true}
+      WB_PROXY_HEALTH_CHECK_TIMEOUT: ${WB_PROXY_HEALTH_CHECK_TIMEOUT:-2s}
+      WB_PROXY_HEALTH_CHECK_PARALLELISM: ${WB_PROXY_HEALTH_CHECK_PARALLELISM:-32}
+      WB_COOKIE_SWITCH_WINDOW_SIZE: ${WB_COOKIE_SWITCH_WINDOW_SIZE:-50}
+      WB_COOKIE_SWITCH_MIN_SAMPLES: ${WB_COOKIE_SWITCH_MIN_SAMPLES:-20}
+      WB_COOKIE_SWITCH_HTTP498_THRESHOLD: ${WB_COOKIE_SWITCH_HTTP498_THRESHOLD:-0.20}
+      WB_CONTINUOUS_SCAN_ENABLED: ${WB_CONTINUOUS_SCAN_ENABLED:-true}
+      WB_MONITORING_ENABLED: ${WB_MONITORING_ENABLED:-false}
+      WB_BASELINE_ON_STARTUP: ${WB_BASELINE_ON_STARTUP:-false}
+      WB_SCAN_PARALLELISM: ${WB_SCAN_PARALLELISM:-20}
+      WB_MONITOR_BATCH_SIZE: ${WB_MONITOR_BATCH_SIZE:-5000}
+      WB_MONITOR_PARALLELISM: ${WB_MONITOR_PARALLELISM:-20}
+      WB_SCAN_INITIAL_DELAY_MS: ${WB_SCAN_INITIAL_DELAY_MS:-3600000}
+      WB_SCAN_FIXED_DELAY_MS: ${WB_SCAN_FIXED_DELAY_MS:-3600000}
+      WB_MONITOR_INITIAL_DELAY_MS: ${WB_MONITOR_INITIAL_DELAY_MS:-60000}
+      WB_MONITOR_FIXED_DELAY_MS: ${WB_MONITOR_FIXED_DELAY_MS:-3600000}
+      WB_PRODUCT_MEASUREMENT_DELAY: ${WB_PRODUCT_MEASUREMENT_DELAY:-1h}
+      WB_PRODUCT_RATE_LIMIT_RETRY_DELAY: ${WB_PRODUCT_RATE_LIMIT_RETRY_DELAY:-1m}
+      WB_REQUEST_TIMEOUT: ${WB_REQUEST_TIMEOUT:-20s}
+      WB_REQUEST_DELAY: ${WB_REQUEST_DELAY:-400ms}
+      WB_LOG_SUCCESSFUL_REQUESTS: ${WB_LOG_SUCCESSFUL_REQUESTS:-true}
+    volumes:
+      - ./cookie.txt:/app/cookie.txt:ro
+      - ./proxies.txt:/app/proxies.txt:ro
+    stop_grace_period: 1m
+
+volumes:
+  stockforecasting-postgres-data:
