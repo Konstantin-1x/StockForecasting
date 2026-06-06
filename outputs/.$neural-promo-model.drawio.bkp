@@ -1,0 +1,152 @@
+<mxfile host="app.diagrams.net" modified="2026-05-17T16:30:00.000Z" agent="Codex" version="24.7.17" type="device">
+  <diagram id="neural-promo-model" name="Neural Promo Forecast Model">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="Нейросетевая модель прогнозирования параметров акции &quot;Баллы за отзывы&quot;" style="text;html=1;strokeColor=none;fillColor=none;fontSize=24;fontStyle=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="170" y="30" width="1260" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="data_wb" value="Исторические данные WB&#xa;почасовые снимки товаров:&#xa;цена, остаток, ставка за отзыв, выгода, рейтинг, отзывы" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eef6ff;strokeColor=#3b82f6;fontSize=13;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="115" width="230" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="data_seller" value="Товар продавца&#xa;категория, артикул, базовая цена, текущий остаток" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f7fee7;strokeColor=#65a30d;fontSize=13;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="255" width="230" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="budget" value="Бюджет промо акции&#xa;вводится продавцом" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff7ed;strokeColor=#f97316;fontSize=13;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="665" width="230" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="feature_vector" value="Входной вектор X&#xa;признаки временного ряда:&#xa;последние 24 точки, средние значения, динамика цены и остатка, ставка за отзыв, категория" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#334155;fontSize=13;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="330" y="165" width="250" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="normalization" value="Нормализация&#xa;Xnorm = (X - mean) / std&#xa;целевые Y тоже нормализуются при обучении" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f1f5f9;strokeColor=#64748b;fontSize=13;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="650" y="175" width="210" height="110" as="geometry" />
+        </mxCell>
+
+        <mxCell id="h1_title" value="Скрытый слой 1&#xa;40 нейронов, tanh" style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;fontStyle=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="935" y="105" width="160" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="h1_1" value="H1,1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="965" y="165" width="80" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="h1_2" value="H1,2" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="965" y="230" width="80" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="h1_dots" value="..." style="text;html=1;strokeColor=none;fillColor=none;fontSize=24;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="980" y="285" width="50" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="h1_40" value="H1,40" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e0f2fe;strokeColor=#0284c7;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="965" y="335" width="80" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="h2_title" value="Скрытый слой 2&#xa;20 нейронов, tanh" style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;fontStyle=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="105" width="160" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="h2_1" value="H2,1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1190" y="170" width="80" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="h2_2" value="H2,2" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1190" y="240" width="80" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="h2_dots" value="..." style="text;html=1;strokeColor=none;fillColor=none;fontSize=24;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="1205" y="295" width="50" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="h2_20" value="H2,20" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1190" y="345" width="80" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="output_title" value="Выходной слой&#xa;линейная активация" style="text;html=1;strokeColor=none;fillColor=none;fontSize=15;fontStyle=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="1385" y="105" width="160" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="y1" value="Y1&#xa;прогноз ставки за отзыв" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;fontSize=12;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1370" y="165" width="185" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="y2" value="Y2&#xa;прогноз времени до акции" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;fontSize=12;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1370" y="250" width="185" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="y3" value="Y3&#xa;прогноз остатка на акции" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef3c7;strokeColor=#d97706;fontSize=12;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1370" y="335" width="185" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="denorm" value="Денормализация выходов&#xa;Y = Ynorm * std + mean" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;fontSize=13;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="500" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="business_rules" value="Постобработка и оптимизация сценария&#xa;бюджет продавца + правила WB/Ozon:&#xa;лимиты ставки, комиссия, НДС, резерв, план отзывов" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff7ed;strokeColor=#f97316;fontSize=13;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="820" y="635" width="410" height="105" as="geometry" />
+        </mxCell>
+
+        <mxCell id="final1" value="Итог 1&#xa;рекомендуемая ставка за отзыв" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#7c3aed;fontSize=13;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1310" y="610" width="225" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="final2" value="Итог 2&#xa;план отзывов" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#7c3aed;fontSize=13;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1310" y="695" width="225" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="final3" value="Итог 3&#xa;ожидаемый срок сбора" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede9fe;strokeColor=#7c3aed;fontSize=13;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1310" y="780" width="225" height="65" as="geometry" />
+        </mxCell>
+
+        <mxCell id="train_note" value="Обучение: MSE, mini-batch gradient descent, batch=16, epochs=180, learning rate=0.01, L2=0.0005.&#xa;При недостатке истории включается cold start на похожих товарах." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#94a3b8;fontSize=12;align=center;" vertex="1" parent="1">
+          <mxGeometry x="330" y="635" width="400" height="105" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e1" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#64748b;" edge="1" parent="1" source="data_wb" target="feature_vector">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#64748b;" edge="1" parent="1" source="data_seller" target="feature_vector">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#64748b;" edge="1" parent="1" source="feature_vector" target="normalization">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#0284c7;" edge="1" parent="1" source="normalization" target="h1_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#0284c7;" edge="1" parent="1" source="normalization" target="h1_2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#0284c7;" edge="1" parent="1" source="normalization" target="h1_40">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#16a34a;" edge="1" parent="1" source="h1_1" target="h2_1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#16a34a;" edge="1" parent="1" source="h1_2" target="h2_2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#16a34a;" edge="1" parent="1" source="h1_40" target="h2_20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#d97706;" edge="1" parent="1" source="h2_1" target="y1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#d97706;" edge="1" parent="1" source="h2_2" target="y2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#d97706;" edge="1" parent="1" source="h2_20" target="y3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#64748b;" edge="1" parent="1" source="y2" target="denorm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#64748b;" edge="1" parent="1" source="denorm" target="business_rules">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#f97316;" edge="1" parent="1" source="budget" target="business_rules">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#7c3aed;" edge="1" parent="1" source="business_rules" target="final1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e17" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#7c3aed;" edge="1" parent="1" source="business_rules" target="final2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e18" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#7c3aed;" edge="1" parent="1" source="business_rules" target="final3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

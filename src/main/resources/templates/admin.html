@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout('Админ-панель', 'admin', ~{::main})}">
+<main>
+    <section class="page-head">
+        <div>
+            <h1>Админ-панель</h1>
+            <p>Здесь собраны операции обслуживания данных, контроль качества временных рядов и запуск нейросетевого прогнозирования для ВКР.</p>
+        </div>
+    </section>
+
+    <section class="grid grid--4">
+        <div class="card metric">
+            <div class="metric__label">Продавцов</div>
+            <div class="metric__value" th:text="${sellerCount}">0</div>
+        </div>
+        <div class="card metric">
+            <div class="metric__label">Товаров</div>
+            <div class="metric__value" th:text="${productCount}">0</div>
+        </div>
+        <div class="card metric">
+            <div class="metric__label">Категорий</div>
+            <div class="metric__value" th:text="${categoryCount}">0</div>
+        </div>
+        <div class="card metric">
+            <div class="metric__label">Прогнозов</div>
+            <div class="metric__value" th:text="${forecastCount}">0</div>
+        </div>
+        <a class="card metric metric--link" th:href="@{/admin/users}">
+            <div class="metric__label">Пользователей</div>
+            <div class="metric__value" th:text="${userCount}">0</div>
+        </a>
+    </section>
+
+    <section class="grid grid--2 admin-grid">
+        <div class="card action-card">
+            <div class="action-card__head">
+                <div>
+                    <h2>Полный перенос базы данных</h2>
+                    <p>Экспорт и импорт всех таблиц текущей схемы PostgreSQL вместе с пользователями, товарами, временными рядами, прогнозами и настройками стартовой страницы.</p>
+                </div>
+                <span class="badge badge--ok">Полная БД</span>
+            </div>
+
+            <div class="action-card__actions">
+                <a class="btn" th:href="@{/admin/data/export}">Скачать полный экспорт</a>
+                <form class="inline-action-form"
+                      th:if="${dataCollectionStatus == null || !dataCollectionStatus.enabled()}"
+                      th:action="@{/admin/data-collection/start}" method="post">
+                    <input th:if="${_csrf != null}" type="hidden"
+                           th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button class="btn btn--soft" type="submit">Запустить сбор данных</button>
+                </form>
+                <form class="inline-action-form"
+                      th:if="${dataCollectionStatus != null && dataCollectionStatus.enabled()}"
+                      th:action="@{/admin/data-collection/stop}" method="post">
+                    <input th:if="${_csrf != null}" type="hidden"
+                           th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button class="btn btn--soft" type="submit">Остановить сбор данных</button>
+                </form>
+                <span class="badge"
+                      th:if="${dataCollectionStatus != null}"
+                      th:classappend="${dataCollectionStatus.enabled()} ? ' badge--ok' : ' badge--warn'"
+                      th:text="${dataCollectionStatus.enabled()} ? 'Сбор включен' : 'Сбор остановлен'">Сбор остановлен</span>
+            </div>
+
+            <form class="import-form" th:action="@{/admin/data/import}" method="post" enctype="multipart/form-data">
+                <input th:if="${_csrf != null}" type="hidden"
+                       th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <label class="field-label" for="dataArchive">Архив экспорта</label>
+                <input class="file-input" id="dataArchive" type="file" name="file" accept=".zip,application/zip" required>
+
+                <label class="checkbox-line">
+                    <input type="checkbox" name="confirmReplace" value="true" required>
+                    <span>Я понимаю, что импорт полностью заменит всю локальную базу данных данными из архива.</span>
+                </label>
+
+                <button class="btn btn--soft" type="submit">Загрузить полный импорт</button>
+            </form>
+        </div>
+
+        <div class="card action-card">
+            <div class="action-card__head">
+                <div>
+                    <h2>Проверка перед прогнозированием</h2>
+                    <p>Детальный контроль структуры, целостности, пропусков и аномалий временного ряда вынесен на отдельную страницу, чтобы административная панель открывалась быстро даже при большой базе снимков.</p>
+                </div>
+                <span class="badge badge--ok">По запросу</span>
+            </div>
+
+            <div class="action-card__actions">
+                <a class="btn btn--soft" th:href="@{/admin/data-quality}">Открыть проверку качества</a>
+                <a class="btn btn--soft" th:href="@{/admin/offers}">Открыть предложения WB</a>
+            </div>
+        </div>
+
+    </section>
+
+    <section class="card action-card" style="margin-top: 18px;">
+        <div class="action-card__head">
+            <div>
+                <h2>Нейросетевой прогноз акций</h2>
+                <p>Обучение MLP-модели по историческим срезам товаров Wildberries. Модель прогнозирует будущую акционную цену, время до начала акции и остаток товара во время акции.</p>
+            </div>
+            <span class="badge badge--ok">MLP</span>
+        </div>
+        <div class="action-card__actions">
+            <form th:action="@{/admin/forecasts/recalculate}" method="post">
+                <input th:if="${_csrf != null}" type="hidden"
+                       th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button class="btn" type="submit">Пересчитать нейросетевые прогнозы</button>
+            </form>
+        </div>
+        <div class="quality-list" th:if="${neuralForecastJobStatus}" style="margin-top: 14px;">
+            <div class="quality-check"
+                 th:classappend="${neuralForecastJobStatus.running()} ? ' quality-check--warn' : ' quality-check--ok'">
+                <div>
+                    <div class="quality-check__title">Статус нейросети</div>
+                    <div class="quality-check__details" th:text="${neuralForecastJobStatus.message()}">Статус</div>
+                </div>
+                <div class="quality-check__value"
+                     th:text="${neuralForecastJobStatus.running()} ? 'В работе' : 'Готово'">Готово</div>
+            </div>
+        </div>
+    </section>
+
+</main>
+</html>

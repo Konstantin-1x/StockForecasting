@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Страница не найдена - Промо Прогноз</title>
+    <link rel="stylesheet" th:href="@{/css/app.css(v='20260517-1')}">
+</head>
+<body class="public-page">
+<main class="auth-shell">
+    <section class="auth-card error-card">
+        <div class="error-code">404</div>
+        <h1>Страница не найдена</h1>
+        <p>Ссылка неверная, страница была перенесена или такого раздела нет.</p>
+        <div class="public-actions">
+            <a class="btn" th:href="@{/}">На стартовую</a>
+            <a class="btn btn--soft" th:href="@{/admin}">В админ-панель</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

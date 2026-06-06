@@ -1,0 +1,69 @@
+spring:
+  application:
+    name: StockForecasting
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/stockforecasting_imported}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:admin}
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:70}
+      minimum-idle: ${DB_POOL_MIN_IDLE:5}
+      connection-timeout: ${DB_CONNECTION_TIMEOUT_MS:120000}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  servlet:
+    multipart:
+      max-file-size: ${DATA_IMPORT_MAX_FILE_SIZE:2GB}
+      max-request-size: ${DATA_IMPORT_MAX_REQUEST_SIZE:2GB}
+
+server:
+  port: ${SERVER_PORT:8080}
+
+app:
+  security:
+    admin-username: ${APP_ADMIN_USERNAME:admin}
+    admin-password: ${APP_ADMIN_PASSWORD:admin}
+
+wb:
+  parser:
+    promotions-url: ${WB_PROMOTIONS_URL:https://static-basket-01.wbbasket.ru/vol0/data/promotions/rubli-za-otzyvy-v3.json}
+    cookie-file: ${WB_COOKIE_FILE:cookie.txt}
+    proxy-file: ${WB_PROXY_FILE:proxies.txt}
+    proxy-username: ${WB_PROXY_USERNAME:}
+    proxy-password: ${WB_PROXY_PASSWORD:}
+    proxy-secure: ${WB_PROXY_SECURE:true}
+    proxy-enabled: ${WB_PROXY_ENABLED:true}
+    proxy-max-attempts: ${WB_PROXY_MAX_ATTEMPTS:10}
+    proxy-failure-cooldown: ${WB_PROXY_FAILURE_COOLDOWN:5m}
+    proxy-request-timeout: ${WB_PROXY_REQUEST_TIMEOUT:8s}
+    proxy-health-check-enabled: ${WB_PROXY_HEALTH_CHECK_ENABLED:true}
+    proxy-health-check-timeout: ${WB_PROXY_HEALTH_CHECK_TIMEOUT:2s}
+    proxy-health-check-parallelism: ${WB_PROXY_HEALTH_CHECK_PARALLELISM:32}
+    cookie-switch-window-size: ${WB_COOKIE_SWITCH_WINDOW_SIZE:50}
+    cookie-switch-min-samples: ${WB_COOKIE_SWITCH_MIN_SAMPLES:20}
+    cookie-switch-http498-threshold: ${WB_COOKIE_SWITCH_HTTP498_THRESHOLD:0.20}
+    max-categories: ${WB_MAX_CATEGORIES:0}
+    max-pages-per-category: ${WB_MAX_PAGES_PER_CATEGORY:0}
+    request-timeout: ${WB_REQUEST_TIMEOUT:20s}
+    request-delay: ${WB_REQUEST_DELAY:400ms}
+    log-successful-requests: ${WB_LOG_SUCCESSFUL_REQUESTS:true}
+    user-agent: ${WB_USER_AGENT:Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:150.0) Gecko/20100101 Firefox/150.0}
+    spa-version: ${WB_SPA_VERSION:14.8.1}
+    device-id: ${WB_DEVICE_ID:}
+    continuous-scan-enabled: ${WB_CONTINUOUS_SCAN_ENABLED:true}
+    monitoring-enabled: ${WB_MONITORING_ENABLED:false}
+    baseline-on-startup: ${WB_BASELINE_ON_STARTUP:true}
+    scan-parallelism: ${WB_SCAN_PARALLELISM:20}
+    monitor-batch-size: ${WB_MONITOR_BATCH_SIZE:5000}
+    monitor-parallelism: ${WB_MONITOR_PARALLELISM:20}
+    scan-initial-delay-ms: ${WB_SCAN_INITIAL_DELAY_MS:3600000}
+    scan-fixed-delay-ms: ${WB_SCAN_FIXED_DELAY_MS:3600000}
+    monitor-initial-delay-ms: ${WB_MONITOR_INITIAL_DELAY_MS:60000}
+    monitor-fixed-delay-ms: ${WB_MONITOR_FIXED_DELAY_MS:3600000}
+    product-measurement-delay: ${WB_PRODUCT_MEASUREMENT_DELAY:1h}
+    product-rate-limit-retry-delay: ${WB_PRODUCT_RATE_LIMIT_RETRY_DELAY:1m}

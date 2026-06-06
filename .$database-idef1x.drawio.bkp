@@ -1,0 +1,88 @@
+<mxfile host="app.diagrams.net" modified="2026-05-18T00:00:00.000Z" agent="Codex" version="24.7.17">
+  <diagram id="stockforecasting-db-idef1x" name="IDEF1X ERD">
+    <mxGraphModel dx="2600" dy="1800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2400" pageHeight="1650" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="&lt;div&gt;&lt;b&gt;IDEF1X-модель физической структуры базы данных StockForecasting&lt;/b&gt;&lt;/div&gt;&lt;div&gt;Верхняя секция сущности содержит первичный ключ; нижняя секция содержит внешние ключи и неключевые атрибуты. Связи построены через встроенный стиль draw.io Entity Relation.&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;fontSize=18;fontColor=#111827;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1250" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="legend" value="&lt;div&gt;&lt;b&gt;Обозначения&lt;/b&gt;&lt;/div&gt;&lt;div align=&quot;left&quot;&gt;PK - первичный ключ&lt;br&gt;FK - внешний ключ&lt;br&gt;UQ - уникальное ограничение&lt;br&gt;Пунктирная связь - неидентифицирующая связь IDEF1X, так как дочерняя таблица использует собственный суррогатный ключ&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;fontSize=12;align=left;verticalAlign=top;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1780" y="20" width="500" height="135" as="geometry"/>
+        </mxCell>
+        <mxCell id="app_users" value="&lt;div&gt;&lt;b&gt;app_users&lt;/b&gt;&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;PK user_id: BIGSERIAL&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;UQ username: VARCHAR(80) NOT NULL&lt;br&gt;password_hash: VARCHAR(120) NOT NULL&lt;br&gt;display_name: VARCHAR(150) NOT NULL&lt;br&gt;UQ email: VARCHAR(180) NOT NULL&lt;br&gt;phone: VARCHAR(60)&lt;br&gt;role: VARCHAR(20) NOT NULL&lt;br&gt;enabled: BOOLEAN NOT NULL&lt;br&gt;FK seller_id: BIGINT&lt;br&gt;created_at: TIMESTAMP NOT NULL&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eef6ff;strokeColor=#2563eb;fontSize=12;align=left;verticalAlign=top;spacing=8;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="110" width="350" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="sellers" value="&lt;div&gt;&lt;b&gt;sellers&lt;/b&gt;&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;PK seller_id: BIGSERIAL&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;shop_name: VARCHAR(150) NOT NULL&lt;br&gt;contact_name: VARCHAR(150)&lt;br&gt;contact_email: VARCHAR(180)&lt;br&gt;contact_phone: VARCHAR(60)&lt;br&gt;tax_id: VARCHAR(40)&lt;br&gt;marketplace_seller_id: VARCHAR(100)&lt;br&gt;seller_notes: VARCHAR(2000)&lt;br&gt;registration_date: DATE NOT NULL&lt;br&gt;status: VARCHAR(30) NOT NULL&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eef6ff;strokeColor=#2563eb;fontSize=12;align=left;verticalAlign=top;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="460" y="110" width="350" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="product_categories" value="&lt;div&gt;&lt;b&gt;product_categories&lt;/b&gt;&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;PK category_id: BIGSERIAL&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;category_name: VARCHAR(200) NOT NULL&lt;br&gt;FK parent_category_id: BIGINT&lt;br&gt;UQ external_url: VARCHAR(600) NOT NULL&lt;br&gt;wb_shard_key: VARCHAR(120)&lt;br&gt;wb_query: VARCHAR(1200)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;fontSize=12;align=left;verticalAlign=top;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="900" y="110" width="370" height="220" as="geometry"/>
+        </mxCell>
+        <mxCell id="landing_page_content" value="&lt;div&gt;&lt;b&gt;landing_page_content&lt;/b&gt;&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;PK content_id: BIGSERIAL&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;kicker: VARCHAR(120) NOT NULL&lt;br&gt;headline: VARCHAR(220) NOT NULL&lt;br&gt;description: VARCHAR(1200) NOT NULL&lt;br&gt;model_label: VARCHAR(80) NOT NULL&lt;br&gt;data_slice_label: VARCHAR(80) NOT NULL&lt;br&gt;source_label: VARCHAR(80) NOT NULL&lt;br&gt;seller_title: VARCHAR(120) NOT NULL&lt;br&gt;seller_description: VARCHAR(600) NOT NULL&lt;br&gt;admin_title: VARCHAR(120) NOT NULL&lt;br&gt;admin_description: VARCHAR(600) NOT NULL&lt;br&gt;research_title: VARCHAR(120) NOT NULL&lt;br&gt;research_description: VARCHAR(600) NOT NULL&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8fafc;strokeColor=#64748b;fontSize=12;align=left;verticalAlign=top;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1780" y="190" width="500" height="360" as="geometry"/>
+        </mxCell>
+        <mxCell id="products" value="&lt;div&gt;&lt;b&gt;products&lt;/b&gt;&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;PK product_id: BIGSERIAL&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;FK seller_id: BIGINT NOT NULL&lt;br&gt;FK category_id: BIGINT NOT NULL&lt;br&gt;UQ marketplace_article: VARCHAR(80) NOT NULL&lt;br&gt;product_name: VARCHAR(500) NOT NULL&lt;br&gt;product_description: VARCHAR(2000)&lt;br&gt;base_price: NUMERIC(12,2)&lt;br&gt;current_stock: INTEGER&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff7ed;strokeColor=#ea580c;fontSize=12;align=left;verticalAlign=top;spacing=8;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="460" y="510" width="360" height="245" as="geometry"/>
+        </mxCell>
+        <mxCell id="tracked_marketplace_products" value="&lt;div&gt;&lt;b&gt;tracked_marketplace_products&lt;/b&gt;&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;PK tracked_product_id: BIGSERIAL&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;FK category_id: BIGINT NOT NULL&lt;br&gt;UQ marketplace_article: VARCHAR(80) NOT NULL&lt;br&gt;product_name: VARCHAR(500) NOT NULL&lt;br&gt;seller_name: VARCHAR(250)&lt;br&gt;supplier_id: BIGINT&lt;br&gt;discovered_price: NUMERIC(12,2)&lt;br&gt;feedback_reward: NUMERIC(12,2)&lt;br&gt;benefit_percent: NUMERIC(10,4)&lt;br&gt;discovered_stock: INTEGER&lt;br&gt;card_url: VARCHAR(600) NOT NULL&lt;br&gt;detail_url: VARCHAR(600) NOT NULL&lt;br&gt;discovered_at: TIMESTAMP NOT NULL&lt;br&gt;active: BOOLEAN NOT NULL&lt;br&gt;completed_at: TIMESTAMP&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;fontSize=12;align=left;verticalAlign=top;spacing=8;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="900" y="470" width="430" height="390" as="geometry"/>
+        </mxCell>
+        <mxCell id="competitor_offers" value="&lt;div&gt;&lt;b&gt;competitor_offers&lt;/b&gt;&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;PK competitor_offer_id: BIGSERIAL&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;FK category_id: BIGINT NOT NULL&lt;br&gt;competitor_name: VARCHAR(250)&lt;br&gt;product_name: VARCHAR(500) NOT NULL&lt;br&gt;competitor_price: NUMERIC(12,2) NOT NULL&lt;br&gt;competitor_discount: NUMERIC(12,2)&lt;br&gt;feedback_reward: NUMERIC(12,2)&lt;br&gt;benefit_percent: NUMERIC(10,4)&lt;br&gt;stock_quantity: INTEGER&lt;br&gt;UQ marketplace_article: VARCHAR(80) NOT NULL&lt;br&gt;card_url: VARCHAR(600) NOT NULL&lt;br&gt;collected_at: TIMESTAMP NOT NULL&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0fdf4;strokeColor=#16a34a;fontSize=12;align=left;verticalAlign=top;spacing=8;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="1390" y="470" width="390" height="330" as="geometry"/>
+        </mxCell>
+        <mxCell id="promotions" value="&lt;div&gt;&lt;b&gt;promotions&lt;/b&gt;&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;PK promotion_id: BIGSERIAL&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;FK product_id: BIGINT NOT NULL&lt;br&gt;planned_start_date: DATE&lt;br&gt;planned_end_date: DATE&lt;br&gt;actual_end_date: DATE&lt;br&gt;bonus_amount: NUMERIC(12,2)&lt;br&gt;promo_product_quantity: INTEGER&lt;br&gt;total_budget: NUMERIC(14,2)&lt;br&gt;status: VARCHAR(30) NOT NULL&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff7ed;strokeColor=#ea580c;fontSize=12;align=left;verticalAlign=top;spacing=8;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="900" width="350" height="260" as="geometry"/>
+        </mxCell>
+        <mxCell id="promotion_forecasts" value="&lt;div&gt;&lt;b&gt;promotion_forecasts&lt;/b&gt;&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;PK forecast_id: BIGSERIAL&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;FK product_id: BIGINT NOT NULL&lt;br&gt;FK tracked_product_id: BIGINT&lt;br&gt;calculated_at: TIMESTAMP NOT NULL&lt;br&gt;promotion_cost_forecast: NUMERIC(14,2)&lt;br&gt;promotion_purchase_forecast: INTEGER&lt;br&gt;sellout_days_forecast: INTEGER&lt;br&gt;promotion_start_hours_forecast: INTEGER&lt;br&gt;promotion_stock_forecast: INTEGER&lt;br&gt;promotion_budget: NUMERIC(14,2)&lt;br&gt;recommended_discount_amount: NUMERIC(14,2)&lt;br&gt;recommended_discount_percent: NUMERIC(6,2)&lt;br&gt;predicted_sellout_hours: INTEGER&lt;br&gt;confidence_interval: NUMERIC(6,2)&lt;br&gt;forecast_model: VARCHAR(80)&lt;br&gt;training_sample_count: INTEGER&lt;br&gt;validation_mae: NUMERIC(10,4)&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f3ff;strokeColor=#7c3aed;fontSize=12;align=left;verticalAlign=top;spacing=8;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="460" y="900" width="430" height="445" as="geometry"/>
+        </mxCell>
+        <mxCell id="marketplace_product_snapshots" value="&lt;div&gt;&lt;b&gt;marketplace_product_snapshots&lt;/b&gt;&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;PK snapshot_id: BIGSERIAL&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;FK tracked_product_id: BIGINT NOT NULL&lt;br&gt;collected_at: TIMESTAMP NOT NULL&lt;br&gt;price: NUMERIC(12,2)&lt;br&gt;stock_quantity: INTEGER&lt;br&gt;feedback_reward: NUMERIC(12,2)&lt;br&gt;benefit_percent: NUMERIC(10,4)&lt;br&gt;rating: NUMERIC(4,2)&lt;br&gt;reviews_count: INTEGER&lt;br&gt;measurement_source: VARCHAR(40)&lt;br&gt;raw_json: TEXT&lt;br&gt;IDX tracked_product_id, collected_at&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecfeff;strokeColor=#0891b2;fontSize=12;align=left;verticalAlign=top;spacing=8;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="950" y="980" width="430" height="330" as="geometry"/>
+        </mxCell>
+        <mxCell id="marketplace_monitoring_jobs" value="&lt;div&gt;&lt;b&gt;marketplace_monitoring_jobs&lt;/b&gt;&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;PK monitoring_job_id: BIGSERIAL&lt;/div&gt;&lt;hr&gt;&lt;div align=&quot;left&quot;&gt;UQ FK tracked_product_id: BIGINT NOT NULL&lt;br&gt;stage: INTEGER NOT NULL&lt;br&gt;next_run_at: TIMESTAMP NOT NULL&lt;br&gt;finished: BOOLEAN NOT NULL&lt;br&gt;last_run_at: TIMESTAMP&lt;br&gt;last_error: VARCHAR(2000)&lt;br&gt;created_at: TIMESTAMP NOT NULL&lt;br&gt;updated_at: TIMESTAMP NOT NULL&lt;br&gt;IDX finished, next_run_at&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ecfeff;strokeColor=#0891b2;fontSize=12;align=left;verticalAlign=top;spacing=8;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="1450" y="980" width="410" height="300" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_sellers_users" value="1 : 0..1" style="edgeStyle=entityRelationEdgeStyle;rounded=0;html=1;startArrow=ERone;endArrow=ERzeroToOne;startFill=0;endFill=0;dashed=1;strokeColor=#334155;fontSize=11;" edge="1" parent="1" source="sellers" target="app_users">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_sellers_products" value="1 : 0..N" style="edgeStyle=entityRelationEdgeStyle;rounded=0;html=1;startArrow=ERone;endArrow=ERzeroToMany;startFill=0;endFill=0;dashed=1;strokeColor=#334155;fontSize=11;" edge="1" parent="1" source="sellers" target="products">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_categories_products" value="1 : 0..N" style="edgeStyle=entityRelationEdgeStyle;rounded=0;html=1;startArrow=ERone;endArrow=ERzeroToMany;startFill=0;endFill=0;dashed=1;strokeColor=#334155;fontSize=11;" edge="1" parent="1" source="product_categories" target="products">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_categories_parent" value="1 : 0..N" style="edgeStyle=entityRelationEdgeStyle;rounded=0;html=1;startArrow=ERone;endArrow=ERzeroToMany;startFill=0;endFill=0;dashed=1;strokeColor=#16a34a;fontSize=11;" edge="1" parent="1" source="product_categories" target="product_categories">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1080" y="70"/>
+              <mxPoint x="1290" y="70"/>
+              <mxPoint x="1290" y="220"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_categories_tracked" value="1 : 0..N" style="edgeStyle=entityRelationEdgeStyle;rounded=0;html=1;startArrow=ERone;endArrow=ERzeroToMany;startFill=0;endFill=0;dashed=1;strokeColor=#334155;fontSize=11;" edge="1" parent="1" source="product_categories" target="tracked_marketplace_products">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_categories_competitor" value="1 : 0..N" style="edgeStyle=entityRelationEdgeStyle;rounded=0;html=1;startArrow=ERone;endArrow=ERzeroToMany;startFill=0;endFill=0;dashed=1;strokeColor=#334155;fontSize=11;" edge="1" parent="1" source="product_categories" target="competitor_offers">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_products_promotions" value="1 : 0..N" style="edgeStyle=entityRelationEdgeStyle;rounded=0;html=1;startArrow=ERone;endArrow=ERzeroToMany;startFill=0;endFill=0;dashed=1;strokeColor=#334155;fontSize=11;" edge="1" parent="1" source="products" target="promotions">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_products_forecasts" value="1 : 0..N" style="edgeStyle=entityRelationEdgeStyle;rounded=0;html=1;startArrow=ERone;endArrow=ERzeroToMany;startFill=0;endFill=0;dashed=1;strokeColor=#334155;fontSize=11;" edge="1" parent="1" source="products" target="promotion_forecasts">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_tracked_forecasts" value="0..1 : 0..N" style="edgeStyle=entityRelationEdgeStyle;rounded=0;html=1;startArrow=ERzeroToOne;endArrow=ERzeroToMany;startFill=0;endFill=0;dashed=1;strokeColor=#334155;fontSize=11;" edge="1" parent="1" source="tracked_marketplace_products" target="promotion_forecasts">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_tracked_snapshots" value="1 : 0..N" style="edgeStyle=entityRelationEdgeStyle;rounded=0;html=1;startArrow=ERone;endArrow=ERzeroToMany;startFill=0;endFill=0;dashed=1;strokeColor=#334155;fontSize=11;" edge="1" parent="1" source="tracked_marketplace_products" target="marketplace_product_snapshots">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel_tracked_jobs" value="1 : 0..1" style="edgeStyle=entityRelationEdgeStyle;rounded=0;html=1;startArrow=ERone;endArrow=ERzeroToOne;startFill=0;endFill=0;dashed=1;strokeColor=#334155;fontSize=11;" edge="1" parent="1" source="tracked_marketplace_products" target="marketplace_monitoring_jobs">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

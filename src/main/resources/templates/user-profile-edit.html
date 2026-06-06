@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout('Редактирование профиля', 'user-profile', ~{::main})}">
+<main>
+    <section class="page-head">
+        <div>
+            <h1>Редактирование профиля</h1>
+            <p>Обновите контактные данные пользователя и сведения о продавце.</p>
+        </div>
+    </section>
+
+    <section class="card action-card">
+        <form class="auth-form auth-form--grid" th:action="@{/app/profile}" th:object="${profileForm}" method="post">
+            <input th:if="${_csrf != null}" type="hidden"
+                   th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+            <div th:if="${#fields.hasGlobalErrors()}" class="alert alert--bad form-wide"
+                 th:each="err : ${#fields.globalErrors()}" th:text="${err}">Ошибка</div>
+
+            <div class="form-section form-wide">Учетная запись</div>
+            <label class="field-group">
+                <span class="field-label">Имя пользователя</span>
+                <input class="text-input" type="text" th:field="*{displayName}" required>
+            </label>
+            <label class="field-group">
+                <span class="field-label">Email пользователя</span>
+                <input class="text-input" type="email" th:field="*{email}" required>
+            </label>
+            <label class="field-group form-wide">
+                <span class="field-label">Телефон пользователя</span>
+                <input class="text-input" type="text" th:field="*{phone}">
+            </label>
+
+            <div class="form-section form-wide">Продавец</div>
+            <label class="field-group">
+                <span class="field-label">Название магазина</span>
+                <input class="text-input" type="text" th:field="*{shopName}" required>
+            </label>
+            <label class="field-group">
+                <span class="field-label">Контактное лицо</span>
+                <input class="text-input" type="text" th:field="*{contactName}" required>
+            </label>
+            <label class="field-group">
+                <span class="field-label">Email продавца</span>
+                <input class="text-input" type="email" th:field="*{contactEmail}" required>
+            </label>
+            <label class="field-group">
+                <span class="field-label">Телефон продавца</span>
+                <input class="text-input" type="text" th:field="*{contactPhone}">
+            </label>
+            <label class="field-group">
+                <span class="field-label">ИНН</span>
+                <input class="text-input" type="text" th:field="*{taxId}">
+            </label>
+            <label class="field-group">
+                <span class="field-label">ID продавца WB</span>
+                <input class="text-input" type="text" th:field="*{marketplaceSellerId}">
+            </label>
+            <label class="field-group form-wide">
+                <span class="field-label">Комментарий</span>
+                <textarea class="text-input text-area" th:field="*{notes}" rows="4"></textarea>
+            </label>
+
+            <div class="form-actions form-wide">
+                <button class="btn" type="submit">Сохранить изменения</button>
+                <a class="btn btn--soft" th:href="@{/app}">Отмена</a>
+            </div>
+        </form>
+    </section>
+</main>
+</html>

@@ -1,0 +1,17 @@
+[Unit]
+Description=StockForecasting Wildberries collector
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+User=stockforecasting
+Group=stockforecasting
+WorkingDirectory=/opt/stockforecasting
+EnvironmentFile=/opt/stockforecasting/stockforecasting.env
+ExecStart=/usr/bin/java -jar /opt/stockforecasting/StockForecasting-1.0-SNAPSHOT.jar
+Restart=always
+RestartSec=15
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target

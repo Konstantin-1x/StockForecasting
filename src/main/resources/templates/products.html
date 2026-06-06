@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout('Товары продавцов', 'products', ~{::main})}">
+<main>
+    <section class="page-head">
+        <div>
+            <h1>Товары продавцов</h1>
+            <p>Карточки товаров, которые будут использоваться при расчете прогнозов маркетинговых акций.</p>
+        </div>
+    </section>
+
+    <section class="card table-card">
+        <div class="table-wrap" th:if="${!products.isEmpty()}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Продавец</th>
+                    <th>Категория</th>
+                    <th>Артикул</th>
+                    <th>Наименование</th>
+                    <th>Базовая цена</th>
+                    <th>Остаток</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="product : ${products}">
+                    <td th:text="${product.seller.shopName}">Продавец</td>
+                    <td th:text="${product.category.name}">Категория</td>
+                    <td class="strong" th:text="${product.marketplaceArticle}">0</td>
+                    <td th:text="${product.name}">Товар</td>
+                    <td th:text="${product.basePrice} + ' ₽'">0 ₽</td>
+                    <td th:text="${product.currentStock}">0</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="empty" th:if="${products.isEmpty()}">Товары продавцов пока не добавлены.</div>
+    </section>
+</main>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout('Конкурентные предложения', 'offers', ~{::main})}">
+<main>
+    <section class="page-head">
+        <div>
+            <h1>Конкурентные предложения</h1>
+            <p>Сохраненные результаты парсинга акции «Рубли за отзывы» с ценой, кешбэком и остатками.</p>
+        </div>
+    </section>
+
+    <section class="offers-workspace">
+        <aside class="card catalog-panel">
+            <div class="catalog-panel__head">
+                <div class="catalog-panel__title">Каталог</div>
+                <a class="catalog-reset"
+                   th:classappend="${selectedCategoryKey == null} ? ' catalog-reset--active'"
+                   th:href="@{/admin/offers}">Все товары</a>
+            </div>
+
+            <div class="catalog-menu">
+                <div class="catalog-root"
+                     th:each="category : ${catalog.rootCategories}"
+                     th:classappend="${category.selected || category.activeTrail} ? ' catalog-root--active'">
+                    <a class="catalog-link"
+                       th:href="@{/admin/offers(categoryKey=${category.key})}"
+                       th:classappend="${category.selected || category.activeTrail} ? ' catalog-link--active'">
+                        <span th:text="${category.name}">Категория</span>
+                        <span class="catalog-link__arrow" th:if="${category.hasChildren}">›</span>
+                    </a>
+                    <div class="catalog-flyout" th:if="${!category.children.isEmpty()}">
+                        <a class="catalog-link catalog-link--child"
+                           th:each="child : ${category.children}"
+                           th:href="@{/admin/offers(categoryKey=${child.key})}"
+                           th:style="'--depth: ' + ${child.depth}"
+                           th:classappend="${child.selected || child.activeTrail} ? ' catalog-link--active'">
+                            <span th:text="${child.name}">Подкатегория</span>
+                            <span class="catalog-link__arrow" th:if="${child.hasChildren}">›</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <section class="card table-card offers-table-card">
+            <div class="table-toolbar">
+                <div>
+                    <div class="table-toolbar__title">Предложения Wildberries</div>
+                    <div class="table-toolbar__hint"
+                         th:text="${catalog.selectedCategoryName == null}
+                         ? 'Показаны все товары, по 100 записей на страницу.'
+                         : 'Фильтр: ' + ${catalog.selectedCategoryName} + '. Показано по 100 записей на страницу.'">
+                        Показаны все товары, по 100 записей на страницу.
+                    </div>
+                </div>
+                <span class="badge" th:text="${offerPage.totalElements} + ' товаров'">0 товаров</span>
+            </div>
+            <div class="table-wrap" th:if="${!offers.isEmpty()}">
+                <table>
+                    <thead>
+                    <tr>
+                        <th th:if="${selectedCategoryKey == null}">Категория</th>
+                        <th>Артикул</th>
+                        <th>Наименование</th>
+                        <th>Данные</th>
+                        <th>Продавец</th>
+                        <th>Цена</th>
+                        <th>Кешбэк</th>
+                        <th>Выгода</th>
+                        <th>Остаток</th>
+                        <th>Сбор</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="offer : ${offers}">
+                        <td th:if="${selectedCategoryKey == null}" th:text="${offer.category.name}">Категория</td>
+                        <td class="strong">
+                            <a th:href="${offer.cardUrl}" target="_blank" th:text="${offer.marketplaceArticle}">0</a>
+                        </td>
+                        <td th:text="${offer.productName}">Товар</td>
+                        <td>
+                            <a class="btn btn--soft btn--sm"
+                               th:href="@{/api/parser/wildberries/product/test(article=${offer.marketplaceArticle}, includeRawPreview=false)}"
+                               target="_blank"
+                               rel="noopener">Данные</a>
+                        </td>
+                        <td th:text="${offer.competitorName ?: 'Не указан'}">Продавец</td>
+                        <td th:text="${offer.competitorPrice} + ' ₽'">0 ₽</td>
+                        <td th:text="${offer.feedbackReward} + ' ₽'">0 ₽</td>
+                        <td><span class="badge badge--ok" th:text="${offer.benefitPercent} + '%'">0%</span></td>
+                        <td th:text="${offer.stockQuantity}">0</td>
+                        <td class="muted" th:text="${offer.collectedAtLabel}">Дата</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="empty" th:if="${offers.isEmpty()}">Товары по выбранному фильтру не найдены.</div>
+
+            <nav class="pagination" th:if="${offerPage.totalPages > 1}">
+                <a class="pagination__link"
+                   th:if="${!offerPage.first}"
+                   th:href="@{/admin/offers(page=${offerPage.number - 1}, categoryKey=${selectedCategoryKey})}">Назад</a>
+                <span class="pagination__link pagination__link--disabled" th:if="${offerPage.first}">Назад</span>
+
+                <div class="pagination__pages">
+                    <th:block th:each="pageNumber : ${paginationPages}">
+                        <span class="pagination__link pagination__link--current"
+                              th:if="${pageNumber == offerPage.number}"
+                              th:text="${pageNumber + 1}">1</span>
+                        <a class="pagination__link"
+                           th:if="${pageNumber != offerPage.number}"
+                           th:href="@{/admin/offers(page=${pageNumber}, categoryKey=${selectedCategoryKey})}"
+                           th:text="${pageNumber + 1}">2</a>
+                    </th:block>
+                </div>
+
+                <a class="pagination__link"
+                   th:if="${!offerPage.last}"
+                   th:href="@{/admin/offers(page=${offerPage.number + 1}, categoryKey=${selectedCategoryKey})}">Вперед</a>
+                <span class="pagination__link pagination__link--disabled" th:if="${offerPage.last}">Вперед</span>
+            </nav>
+        </section>
+    </section>
+
+    <script>
+        (() => {
+            const roots = Array.from(document.querySelectorAll(".catalog-root"));
+            const compactView = () => window.matchMedia("(max-width: 920px)").matches;
+            const gap = 12;
+            const closeDelayMs = 500;
+            let activeRoot = null;
+            let closeTimer = null;
+
+            function clearCloseTimer() {
+                if (closeTimer !== null) {
+                    window.clearTimeout(closeTimer);
+                    closeTimer = null;
+                }
+            }
+
+            function pointerInside(root) {
+                const flyout = root.querySelector(".catalog-flyout");
+                return root.matches(":hover") || Boolean(flyout && flyout.matches(":hover"));
+            }
+
+            function positionFlyout(root) {
+                const flyout = root.querySelector(".catalog-flyout");
+                if (!flyout || compactView()) {
+                    return;
+                }
+
+                const rootRect = root.getBoundingClientRect();
+                const width = Math.min(360, Math.max(300, flyout.offsetWidth || 330));
+                const maxHeight = Math.max(240, window.innerHeight - gap * 2);
+
+                flyout.style.width = `${width}px`;
+                flyout.style.maxHeight = `${maxHeight}px`;
+
+                const height = Math.min(flyout.scrollHeight, maxHeight);
+                let left = rootRect.right + 6;
+                if (left + width > window.innerWidth - gap) {
+                    left = Math.max(gap, rootRect.left - width - 6);
+                }
+
+                const maxTop = window.innerHeight - height - gap;
+                const top = Math.max(gap, Math.min(rootRect.top - 8, maxTop));
+
+                flyout.style.left = `${left}px`;
+                flyout.style.top = `${top}px`;
+            }
+
+            function openRoot(root) {
+                if (compactView()) {
+                    return;
+                }
+                if (activeRoot && activeRoot !== root) {
+                    closeRootNow(activeRoot);
+                }
+                clearCloseTimer();
+                activeRoot = root;
+                root.classList.add("catalog-root--open");
+                positionFlyout(root);
+            }
+
+            function closeRootNow(root) {
+                clearCloseTimer();
+                root.classList.remove("catalog-root--open");
+                if (activeRoot === root) {
+                    activeRoot = null;
+                }
+            }
+
+            function scheduleClose(root) {
+                if (compactView()) {
+                    return;
+                }
+                clearCloseTimer();
+                closeTimer = window.setTimeout(() => {
+                    closeTimer = null;
+                    if (!pointerInside(root)) {
+                        closeRootNow(root);
+                    }
+                }, closeDelayMs);
+            }
+
+            roots.forEach((root) => {
+                const flyout = root.querySelector(".catalog-flyout");
+
+                root.addEventListener("mouseenter", () => openRoot(root));
+                root.addEventListener("focusin", () => openRoot(root));
+                root.addEventListener("mouseleave", () => scheduleClose(root));
+                root.addEventListener("focusout", (event) => {
+                    if (!(event.relatedTarget instanceof Node) || !root.contains(event.relatedTarget)) {
+                        scheduleClose(root);
+                    }
+                });
+
+                if (flyout) {
+                    flyout.addEventListener("mouseenter", () => {
+                        clearCloseTimer();
+                        openRoot(root);
+                    });
+                    flyout.addEventListener("mouseleave", () => scheduleClose(root));
+                }
+            });
+
+            window.addEventListener("resize", () => {
+                if (activeRoot) {
+                    positionFlyout(activeRoot);
+                }
+            });
+            document.addEventListener("scroll", () => {
+                if (activeRoot) {
+                    positionFlyout(activeRoot);
+                }
+            }, true);
+        })();
+    </script>
+</main>
+</html>

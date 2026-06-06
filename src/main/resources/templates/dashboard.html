@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout('Панель управления', 'dashboard', ~{::main})}">
+<main>
+    <section class="page-head">
+        <div>
+            <h1>Панель управления</h1>
+            <p>Сводка по данным системы прогнозирования и последним предложениям, полученным парсером.</p>
+        </div>
+        <form class="form-inline" th:action="@{/admin/parser/import}" method="post">
+            <input th:if="${_csrf != null}" type="hidden"
+                   th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input class="input" type="number" name="maxCategories" min="1" max="500" value="3" title="Категории">
+            <input class="input" type="number" name="maxPagesPerCategory" min="1" max="100" value="1" title="Страницы">
+            <button class="btn" type="submit">Запустить парсер</button>
+        </form>
+    </section>
+
+    <section class="grid grid--4">
+        <div class="card metric">
+            <div class="metric__label">Продавцов</div>
+            <div class="metric__value" th:text="${sellerCount}">0</div>
+        </div>
+        <div class="card metric">
+            <div class="metric__label">Товаров</div>
+            <div class="metric__value" th:text="${productCount}">0</div>
+        </div>
+        <div class="card metric">
+            <div class="metric__label">Категорий WB</div>
+            <div class="metric__value" th:text="${categoryCount}">0</div>
+        </div>
+        <div class="card metric">
+            <div class="metric__label">Предложений конкурентов</div>
+            <div class="metric__value" th:text="${offerCount}">0</div>
+        </div>
+    </section>
+
+    <section class="card table-card" style="margin-top: 18px;">
+        <div class="table-toolbar">
+            <div>
+                <div class="table-toolbar__title">Последние предложения</div>
+                <div class="table-toolbar__hint">Данные берутся напрямую из таблицы конкурентных предложений.</div>
+            </div>
+            <a class="btn btn--soft" th:href="@{/admin/offers}">Открыть все</a>
+        </div>
+        <div class="table-wrap" th:if="${!latestOffers.isEmpty()}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Артикул</th>
+                    <th>Товар</th>
+                    <th>Цена</th>
+                    <th>Кешбэк</th>
+                    <th>Выгода</th>
+                    <th>Остаток</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="offer : ${latestOffers}">
+                    <td class="strong" th:text="${offer.marketplaceArticle}">0</td>
+                    <td>
+                        <a th:href="${offer.cardUrl}" target="_blank" th:text="${offer.productName}">Товар</a>
+                        <div class="muted" th:text="${offer.competitorName}">Магазин</div>
+                    </td>
+                    <td th:text="${offer.competitorPrice} + ' ₽'">0 ₽</td>
+                    <td th:text="${offer.feedbackReward} + ' ₽'">0 ₽</td>
+                    <td><span class="badge badge--ok" th:text="${offer.benefitPercent} + '%'">0%</span></td>
+                    <td th:text="${offer.stockQuantity}">0</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="empty" th:if="${latestOffers.isEmpty()}">Пока нет сохраненных предложений. Запустите парсер после обновления куки.</div>
+    </section>
+</main>
+</html>

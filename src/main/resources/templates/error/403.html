@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Доступ запрещен - Промо Прогноз</title>
+    <link rel="stylesheet" th:href="@{/css/app.css(v='20260517-1')}">
+</head>
+<body class="public-page">
+<main class="auth-shell">
+    <section class="auth-card error-card">
+        <div class="error-code">403</div>
+        <h1>Недостаточно прав</h1>
+        <p>Для этого раздела нужна учетная запись администратора.</p>
+        <div class="public-actions">
+            <a class="btn" th:href="@{/login}">Войти</a>
+            <a class="btn btn--soft" th:href="@{/}">На стартовую</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

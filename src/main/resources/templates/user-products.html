@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout('Товары продавца', 'user-products', ~{::main})}">
+<main>
+    <section class="page-head">
+        <div>
+            <h1>Товары продавца</h1>
+            <p>Список товаров, которые участвуют в прогнозировании промо акций и связываются с вашим кабинетом продавца.</p>
+        </div>
+        <div class="page-actions">
+            <a class="btn" th:href="@{/app/products/new}">Добавить товар</a>
+            <a class="btn btn--soft" th:href="@{/app/forecasts}">Прогнозирование</a>
+        </div>
+    </section>
+
+    <section class="grid grid--3">
+        <div class="card metric">
+            <div class="metric__label">Всего товаров</div>
+            <div class="metric__value" th:text="${products.size()}">0</div>
+        </div>
+        <div class="card metric">
+            <div class="metric__label">Магазин</div>
+            <div class="metric__value metric__value--text" th:text="${seller != null ? seller.shopName : 'Нет продавца'}">Магазин</div>
+        </div>
+        <a class="card metric metric--link" th:href="@{/app/products/new}">
+            <div class="metric__label">Действие</div>
+            <div class="metric__value metric__value--text">Добавить</div>
+        </a>
+    </section>
+
+    <section class="card table-card" style="margin-top: 18px;">
+        <div class="table-toolbar">
+            <div>
+                <div class="table-toolbar__title">Карточки товаров</div>
+                <div class="table-toolbar__hint">Для прогноза важны категория, базовая цена и текущий остаток.</div>
+            </div>
+        </div>
+        <div class="table-wrap" th:if="${!products.isEmpty()}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Категория</th>
+                    <th>Артикул WB</th>
+                    <th>Наименование</th>
+                    <th>Базовая цена</th>
+                    <th>Остаток</th>
+                    <th>Прогноз</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="product : ${products}">
+                    <td th:text="${product.category.name}">Категория</td>
+                    <td class="strong" th:text="${product.marketplaceArticle}">0</td>
+                    <td>
+                        <div class="strong" th:text="${product.name}">Товар</div>
+                        <div class="muted" th:if="${product.description}" th:text="${product.description}">Описание</div>
+                    </td>
+                    <td th:text="${product.basePrice} + ' ₽'">0 ₽</td>
+                    <td th:text="${product.currentStock}">0</td>
+                    <td><a class="btn btn--soft btn--sm" th:href="@{/app/forecasts(productId=${product.id})}">Рассчитать</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="empty" th:if="${products.isEmpty()}">Добавьте первый товар, чтобы запустить прогнозирование промо акции.</div>
+    </section>
+</main>
+</html>
