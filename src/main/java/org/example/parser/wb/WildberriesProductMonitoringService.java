@@ -136,7 +136,6 @@ public class WildberriesProductMonitoringService {
         snapshot.setRating(details.rating());
         snapshot.setReviewsCount(details.reviewsCount());
         snapshot.setMeasurementSource("PRODUCT_DETAIL");
-        snapshot.setRawJson(details.rawJson());
         snapshotRepository.save(snapshot);
 
         product.setProductName(details.name());

@@ -340,7 +340,6 @@ public class WildberriesProductDiscoveryService {
         snapshot.setRating(product.rating());
         snapshot.setReviewsCount(product.reviewsCount());
         snapshot.setMeasurementSource("DISCOVERY_CATALOG");
-        snapshot.setRawJson(product.rawJson());
         snapshotRepository.save(snapshot);
     }
 

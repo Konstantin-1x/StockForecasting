@@ -51,11 +51,11 @@ public class DataTransferController {
                              RedirectAttributes redirectAttributes) {
         if (!confirmReplace) {
             redirectAttributes.addFlashAttribute("error", "Импорт не выполнен: нужно подтвердить замену локальной базы.");
-            return "redirect:/admin";
+            return "redirect:/admin/diagnostics";
         }
         if (file.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "Импорт не выполнен: файл архива не выбран.");
-            return "redirect:/admin";
+            return "redirect:/admin/diagnostics";
         }
 
         try {
@@ -65,7 +65,7 @@ public class DataTransferController {
         } catch (IOException | RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", "Импорт не выполнен: " + errorMessage(e));
         }
-        return "redirect:/admin";
+        return "redirect:/admin/diagnostics";
     }
 
     private static String errorMessage(Exception error) {

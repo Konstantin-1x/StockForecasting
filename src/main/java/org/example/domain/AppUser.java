@@ -14,6 +14,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(
@@ -24,6 +26,9 @@ import java.time.Instant;
         }
 )
 public class AppUser {
+
+    private static final DateTimeFormatter VIEW_DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm").withZone(ZoneId.systemDefault());
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -133,6 +138,10 @@ public class AppUser {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getCreatedAtLabel() {
+        return createdAt == null ? "" : VIEW_DATE_FORMATTER.format(createdAt);
     }
 
     public boolean hasSeller() {

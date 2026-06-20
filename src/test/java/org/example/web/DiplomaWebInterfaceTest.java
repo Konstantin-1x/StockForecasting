@@ -79,10 +79,22 @@ class DiplomaWebInterfaceTest {
                         "productCount",
                         "categoryCount",
                         "forecastCount",
+                        "offerCount",
+                        "promotionCount",
+                        "userCount"
+                ));
+
+        mockMvc.perform(get("/admin/diagnostics").session(adminSession))
+                .andExpect(status().isOk())
+                .andExpect(view().name("diagnostics"))
+                .andExpect(model().attributeExists(
+                        "diagnostics",
+                        "diagnosticAlerts",
                         "dataCollectionStatus"
                 ));
         System.out.println("[REPORT] Login admin/admin -> authenticated");
         System.out.println("[REPORT] GET /admin as administrator -> HTTP 200, view=admin, dashboard metrics loaded");
+        System.out.println("[REPORT] GET /admin/diagnostics as administrator -> HTTP 200, service controls loaded");
     }
 
     @Test

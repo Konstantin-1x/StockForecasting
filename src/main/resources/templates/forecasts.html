@@ -5,7 +5,7 @@
     <section class="page-head">
         <div>
             <h1>Нейросетевые прогнозы акций</h1>
-            <p>Здесь сохраняются расчеты MLP-модели по историческим данным товара: будущая акционная цена, время до старта акции и ожидаемый остаток во время акции.</p>
+            <p>Здесь сохраняются расчеты по историческим данным товара: бюджет, ставка за отзыв, план отзывов, срок реализации и ожидаемый остаток.</p>
         </div>
     </section>
 
@@ -28,10 +28,12 @@
                 <tr>
                     <th>Дата расчета</th>
                     <th>Товар</th>
+                    <th>Бюджет</th>
                     <th>Ставка за отзыв</th>
-                    <th>До начала акции</th>
-                    <th>Остаток во время акции</th>
-                    <th>Качество модели</th>
+                    <th>План отзывов</th>
+                    <th>Срок реализации</th>
+                    <th>Остаток</th>
+                    <th>Качество</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -41,19 +43,39 @@
                         <div class="strong" th:text="${forecast.displayProductName}">Название товара</div>
                         <div class="muted" th:text="${'Артикул WB: ' + forecast.displayMarketplaceArticle}">Артикул WB</div>
                     </td>
+                    <td th:text="${forecast.promotionBudgetLabel ?: '-'}">0 ₽</td>
                     <td th:text="${forecast.promotionCostForecastLabel}">0 ₽</td>
-                    <td th:text="${forecast.promotionStartLabel}">0 ч.</td>
+                    <td th:text="${forecast.promotionPurchaseForecast ?: '-'}">0</td>
+                    <td th:text="${forecast.predictedSelloutLabel}">0 д.</td>
                     <td th:text="${forecast.promotionStockLabel}">0</td>
                     <td>
                         <div class="strong" th:text="${forecast.confidenceLabel}">0%</div>
-                        <div class="muted" th:if="${forecast.forecastModel}" th:text="${forecast.forecastModel}">mlp-neural-promo-v1</div>
-                        <div class="muted" th:if="${forecast.validationMae}" th:text="${'MAE: ' + forecast.validationMaeLabel}">MAE: 0.0000</div>
-                        <div class="muted" th:if="${forecast.trainingSampleCount}" th:text="${'Обучающих примеров: ' + forecast.trainingSampleCount}">Обучающих примеров: 0</div>
                     </td>
                 </tr>
                 </tbody>
             </table>
         </div>
+        <nav class="pagination" th:if="${forecastPage.totalPages > 1}">
+            <a class="pagination__link"
+               th:if="${!forecastPage.first}"
+               th:href="@{/admin/forecasts(page=${forecastPage.number - 1})}">Назад</a>
+            <span class="pagination__link pagination__link--disabled" th:if="${forecastPage.first}">Назад</span>
+            <div class="pagination__pages">
+                <th:block th:each="pageNumber : ${paginationPages}">
+                    <span class="pagination__link pagination__link--current"
+                          th:if="${pageNumber == forecastPage.number}"
+                          th:text="${pageNumber + 1}">1</span>
+                    <a class="pagination__link"
+                       th:if="${pageNumber != forecastPage.number}"
+                       th:href="@{/admin/forecasts(page=${pageNumber})}"
+                       th:text="${pageNumber + 1}">2</a>
+                </th:block>
+            </div>
+            <a class="pagination__link"
+               th:if="${!forecastPage.last}"
+               th:href="@{/admin/forecasts(page=${forecastPage.number + 1})}">Вперед</a>
+            <span class="pagination__link pagination__link--disabled" th:if="${forecastPage.last}">Вперед</span>
+        </nav>
         <div class="empty" th:if="${forecasts.isEmpty()}">Прогнозы пока не рассчитаны. Запустите обучение модели из админ-панели.</div>
     </section>
 </main>

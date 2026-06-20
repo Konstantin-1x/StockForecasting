@@ -1,10 +1,34 @@
 package org.example.forecast;
 
+import java.math.BigDecimal;
+
 public record NeuralForecastRunResult(
         int trackedProductsConsidered,
         int trainingSamples,
         int forecastsSaved,
         int skippedProducts,
-        String statusMessage
+        String statusMessage,
+        ForecastScenarioSummary scenario
 ) {
+    public NeuralForecastRunResult(int trackedProductsConsidered,
+                                   int trainingSamples,
+                                   int forecastsSaved,
+                                   int skippedProducts,
+                                   String statusMessage) {
+        this(trackedProductsConsidered, trainingSamples, forecastsSaved, skippedProducts, statusMessage, null);
+    }
+
+    public record ForecastScenarioSummary(
+            String productName,
+            BigDecimal budget,
+            BigDecimal reviewReward,
+            int plannedReviews,
+            int collectionDays,
+            int platformCampaignDays,
+            int stockAtStart,
+            BigDecimal confidencePercent,
+            int trainingSamples,
+            String modelLabel
+    ) {
+    }
 }

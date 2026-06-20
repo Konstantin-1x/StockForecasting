@@ -42,10 +42,10 @@ class WildberriesResponseParserTest {
         List<WildberriesCategoryRef> categories = parser.parsePromotionCategories(json);
 
         assertThat(categories).hasSize(2);
-        assertThat(categories.getFirst().categoryUrl())
+        assertThat(categories.get(0).categoryUrl())
                 .isEqualTo("https://www.wildberries.ru/promotions/rubli-za-otzyvy/obuv");
-        assertThat(categories.getFirst().query()).isEqualTo("cat=1");
-        assertThat(categories.getFirst().action()).isEqualTo("123");
+        assertThat(categories.get(0).query()).isEqualTo("cat=1");
+        assertThat(categories.get(0).action()).isEqualTo("123");
     }
 
     @Test
@@ -73,7 +73,7 @@ class WildberriesResponseParserTest {
 
         assertThat(page.total()).isEqualTo(1);
         assertThat(page.products()).hasSize(1);
-        WildberriesParsedProduct product = page.products().getFirst();
+        WildberriesParsedProduct product = page.products().get(0);
         assertThat(product.article()).isEqualTo("987");
         assertThat(product.price()).isEqualByComparingTo(new BigDecimal("1500"));
         assertThat(product.feedbackReward()).isEqualByComparingTo(new BigDecimal("450"));

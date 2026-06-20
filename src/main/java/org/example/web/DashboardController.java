@@ -2,6 +2,7 @@ package org.example.web;
 
 import jakarta.validation.Valid;
 import org.example.domain.CompetitorOffer;
+import org.example.domain.PromotionForecast;
 import org.example.forecast.NeuralForecastJobService;
 import org.example.parser.wb.DataCollectionControlService;
 import org.example.parser.wb.DataCollectionStatus;
@@ -32,6 +33,8 @@ import java.util.stream.IntStream;
 
 @Controller
 public class DashboardController {
+
+    private static final int ADMIN_FORECAST_PAGE_SIZE = 20;
 
     private final SellerRepository sellerRepository;
     private final ProductRepository productRepository;
@@ -164,8 +167,16 @@ public class DashboardController {
     }
 
     @GetMapping("/admin/forecasts")
-    public String forecasts(Model model) {
-        model.addAttribute("forecasts", forecastRepository.findAll(Sort.by(Sort.Direction.DESC, "calculatedAt")));
+    public String forecasts(@RequestParam(defaultValue = "0") Integer page, Model model) {
+        PageRequest pageRequest = PageRequest.of(
+                Math.max(0, page == null ? 0 : page),
+                ADMIN_FORECAST_PAGE_SIZE,
+                Sort.by(Sort.Direction.DESC, "calculatedAt")
+        );
+        Page<PromotionForecast> forecastPage = forecastRepository.findAll(pageRequest);
+        model.addAttribute("forecastPage", forecastPage);
+        model.addAttribute("forecasts", forecastPage.getContent());
+        model.addAttribute("paginationPages", pageNumbers(forecastPage));
         model.addAttribute("neuralForecastJobStatus", neuralForecastJobService.currentStatus());
         return "forecasts";
     }
@@ -183,8 +194,8 @@ public class DashboardController {
         model.addAttribute("forecastCount", forecastRepository.count());
         model.addAttribute("categoryCount", categoryRepository.count());
         model.addAttribute("userCount", userRepository.count());
-        model.addAttribute("neuralForecastJobStatus", neuralForecastJobService.currentStatus());
-        model.addAttribute("dataCollectionStatus", dataCollectionControlService.currentStatus());
+        model.addAttribute("offerCount", offerRepository.count());
+        model.addAttribute("promotionCount", promotionRepository.count());
         return "admin";
     }
 
@@ -192,14 +203,14 @@ public class DashboardController {
     public String startDataCollection(RedirectAttributes redirectAttributes) {
         DataCollectionStatus status = dataCollectionControlService.startCollection();
         redirectAttributes.addFlashAttribute("status", status.message());
-        return "redirect:/admin";
+        return "redirect:/admin/diagnostics";
     }
 
     @PostMapping("/admin/data-collection/stop")
     public String stopDataCollection(RedirectAttributes redirectAttributes) {
         DataCollectionStatus status = dataCollectionControlService.stopCollection();
         redirectAttributes.addFlashAttribute("status", status.message());
-        return "redirect:/admin";
+        return "redirect:/admin/diagnostics";
     }
 
     @PostMapping({"/admin/parser/import", "/parser/import"})

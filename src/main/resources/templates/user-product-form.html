@@ -9,41 +9,31 @@
         </div>
     </section>
 
-    <section class="offers-workspace">
-        <aside class="card catalog-panel">
-            <div class="catalog-panel__head">
-                <div class="catalog-panel__title">Каталог WB</div>
-                <a class="catalog-reset"
-                   th:classappend="${selectedCategoryKey == null} ? ' catalog-reset--active'"
-                   th:href="@{/app/products/new}">Сбросить</a>
+    <section class="card action-card category-step" th:if="${selectedProductCategory == null}">
+        <div class="action-card__head">
+            <div>
+                <h2>Выберите категорию WB</h2>
+                <p>После выбора категории откроется форма с параметрами товара.</p>
             </div>
-
-            <div class="catalog-menu">
-                <div class="catalog-root"
-                     th:each="category : ${catalog.rootCategories}"
-                     th:classappend="${category.selected || category.activeTrail} ? ' catalog-root--active'">
-                    <a class="catalog-link"
-                       th:href="@{/app/products/new(categoryKey=${category.key})}"
-                       th:classappend="${category.selected || category.activeTrail} ? ' catalog-link--active'">
-                        <span th:text="${category.name}">Категория</span>
-                        <span class="catalog-link__arrow" th:if="${category.hasChildren}">›</span>
-                    </a>
-                    <div class="catalog-flyout" th:if="${!category.children.isEmpty()}">
-                        <a class="catalog-link catalog-link--child"
-                           th:each="child : ${category.children}"
-                           th:href="@{/app/products/new(categoryKey=${child.key})}"
-                           th:style="'--depth: ' + ${child.depth}"
-                           th:classappend="${child.selected || child.activeTrail} ? ' catalog-link--active'">
-                            <span th:text="${child.name}">Подкатегория</span>
-                            <span class="catalog-link__arrow" th:if="${child.hasChildren}">›</span>
-                        </a>
-                    </div>
-                </div>
+        </div>
+        <div class="catalog-browser catalog-browser--inline">
+            <div class="catalog-menu catalog-menu--dropdown">
+                <th:block th:replace="~{catalog-fragments :: productCatalogItems(${catalog.rootCategories})}"></th:block>
             </div>
-        </aside>
+        </div>
+    </section>
 
-        <section class="card action-card">
-        <form class="auth-form auth-form--grid" th:action="@{/app/products}" th:object="${productForm}" method="post">
+    <section class="card action-card" th:if="${selectedProductCategory != null}">
+        <div class="selected-category selected-category--ready">
+            <span>Выбранная категория</span>
+            <strong th:text="${selectedProductCategory.name}">Категория</strong>
+            <small th:text="${selectedProductCategory.externalUrl}">Ссылка</small>
+            <div class="form-actions">
+                <a class="btn btn--soft" th:href="@{/app/products/new}">Поменять категорию</a>
+            </div>
+        </div>
+
+        <form class="auth-form auth-form--grid async-form" th:action="@{/app/products}" th:object="${productForm}" method="post" data-success-url="/app/products">
             <input th:if="${_csrf != null}" type="hidden"
                    th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
@@ -51,12 +41,6 @@
                  th:each="err : ${#fields.globalErrors()}" th:text="${err}">Ошибка</div>
 
             <input type="hidden" th:field="*{categoryId}">
-            <div class="selected-category form-wide"
-                 th:classappend="${selectedProductCategory == null} ? ' selected-category--empty'">
-                <span>Выбранная категория</span>
-                <strong th:text="${selectedProductCategory != null ? selectedProductCategory.name : 'Выберите конечную категорию в каталоге слева'}">Категория</strong>
-                <small th:if="${selectedProductCategory != null}" th:text="${selectedProductCategory.externalUrl}">Ссылка</small>
-            </div>
             <div th:if="${#fields.hasErrors('categoryId')}" class="alert alert--bad form-wide"
                  th:errors="*{categoryId}">Выберите категорию</div>
 
@@ -83,125 +67,9 @@
 
             <div class="form-actions form-wide">
                 <button class="btn" type="submit">Сохранить товар</button>
-                <a class="btn btn--soft" th:href="@{/app}">Отмена</a>
+                <a class="btn btn--soft" th:href="@{/app/products}">Отмена</a>
             </div>
         </form>
-        </section>
     </section>
-
-    <script>
-        (() => {
-            const roots = Array.from(document.querySelectorAll(".catalog-root"));
-            const compactView = () => window.matchMedia("(max-width: 920px)").matches;
-            const gap = 12;
-            const closeDelayMs = 500;
-            let activeRoot = null;
-            let closeTimer = null;
-
-            function clearCloseTimer() {
-                if (closeTimer !== null) {
-                    window.clearTimeout(closeTimer);
-                    closeTimer = null;
-                }
-            }
-
-            function pointerInside(root) {
-                const flyout = root.querySelector(".catalog-flyout");
-                return root.matches(":hover") || Boolean(flyout && flyout.matches(":hover"));
-            }
-
-            function positionFlyout(root) {
-                const flyout = root.querySelector(".catalog-flyout");
-                if (!flyout || compactView()) {
-                    return;
-                }
-
-                const rootRect = root.getBoundingClientRect();
-                const width = Math.min(360, Math.max(300, flyout.offsetWidth || 330));
-                const maxHeight = Math.max(240, window.innerHeight - gap * 2);
-
-                flyout.style.width = `${width}px`;
-                flyout.style.maxHeight = `${maxHeight}px`;
-
-                const height = Math.min(flyout.scrollHeight, maxHeight);
-                let left = rootRect.right + 6;
-                if (left + width > window.innerWidth - gap) {
-                    left = Math.max(gap, rootRect.left - width - 6);
-                }
-
-                const maxTop = window.innerHeight - height - gap;
-                const top = Math.max(gap, Math.min(rootRect.top - 8, maxTop));
-
-                flyout.style.left = `${left}px`;
-                flyout.style.top = `${top}px`;
-            }
-
-            function openRoot(root) {
-                if (compactView()) {
-                    return;
-                }
-                if (activeRoot && activeRoot !== root) {
-                    closeRootNow(activeRoot);
-                }
-                clearCloseTimer();
-                activeRoot = root;
-                root.classList.add("catalog-root--open");
-                positionFlyout(root);
-            }
-
-            function closeRootNow(root) {
-                clearCloseTimer();
-                root.classList.remove("catalog-root--open");
-                if (activeRoot === root) {
-                    activeRoot = null;
-                }
-            }
-
-            function scheduleClose(root) {
-                if (compactView()) {
-                    return;
-                }
-                clearCloseTimer();
-                closeTimer = window.setTimeout(() => {
-                    closeTimer = null;
-                    if (!pointerInside(root)) {
-                        closeRootNow(root);
-                    }
-                }, closeDelayMs);
-            }
-
-            roots.forEach((root) => {
-                const flyout = root.querySelector(".catalog-flyout");
-
-                root.addEventListener("mouseenter", () => openRoot(root));
-                root.addEventListener("focusin", () => openRoot(root));
-                root.addEventListener("mouseleave", () => scheduleClose(root));
-                root.addEventListener("focusout", (event) => {
-                    if (!(event.relatedTarget instanceof Node) || !root.contains(event.relatedTarget)) {
-                        scheduleClose(root);
-                    }
-                });
-
-                if (flyout) {
-                    flyout.addEventListener("mouseenter", () => {
-                        clearCloseTimer();
-                        openRoot(root);
-                    });
-                    flyout.addEventListener("mouseleave", () => scheduleClose(root));
-                }
-            });
-
-            window.addEventListener("resize", () => {
-                if (activeRoot) {
-                    positionFlyout(activeRoot);
-                }
-            });
-            document.addEventListener("scroll", () => {
-                if (activeRoot) {
-                    positionFlyout(activeRoot);
-                }
-            }, true);
-        })();
-    </script>
 </main>
 </html>

@@ -24,7 +24,7 @@ import java.util.Map;
 public class WildberriesParserController {
 
     private static final Logger log = LoggerFactory.getLogger(WildberriesParserController.class);
-    private static final int RAW_JSON_PREVIEW_LIMIT = 2000;
+    private static final int RESPONSE_PREVIEW_LIMIT = 2000;
 
     private final WildberriesParserService parserService;
     private final WildberriesHttpClient httpClient;
@@ -97,7 +97,7 @@ public class WildberriesParserController {
     @GetMapping("/product/test")
     public WildberriesProductDetailTestResult testProductDetail(
             @RequestParam String article,
-            @RequestParam(defaultValue = "true") boolean includeRawPreview
+            @RequestParam(defaultValue = "true") boolean includeResponsePreview
     ) throws IOException {
         String normalizedArticle = article.trim();
         String cardUrl = WildberriesProductDetailUrlBuilder.cardUrl(normalizedArticle);
@@ -130,7 +130,7 @@ public class WildberriesParserController {
             );
         }
         WildberriesProductDetails details = responseParser.parseProductDetail(json, normalizedArticle);
-        String rawPreview = includeRawPreview ? rawPreview(json) : null;
+        String responsePreview = includeResponsePreview ? responsePreview(json) : null;
 
         WildberriesProductDetailTestResult result = new WildberriesProductDetailTestResult(
                 true,
@@ -146,11 +146,11 @@ public class WildberriesParserController {
                 details.rating(),
                 details.reviewsCount(),
                 json.length(),
-                rawPreview,
+                responsePreview,
                 Instant.now()
         );
 
-        log.info("WB product detail test result: article={}, name='{}', supplier='{}', price={}, stock={}, reward={}, rating={}, reviews={}, rawJsonLength={}",
+        log.info("WB product detail test result: article={}, name='{}', supplier='{}', price={}, stock={}, reward={}, rating={}, reviews={}, responseLength={}",
                 result.article(),
                 result.name(),
                 result.supplier(),
@@ -159,17 +159,17 @@ public class WildberriesParserController {
                 result.feedbackReward(),
                 result.rating(),
                 result.reviewsCount(),
-                result.rawJsonLength());
-        if (includeRawPreview) {
-            log.info("WB product detail test raw preview for article={}: {}", result.article(), result.rawJsonPreview());
+                result.responseLength());
+        if (includeResponsePreview) {
+            log.info("WB product detail test response preview for article={}: {}", result.article(), result.responsePreview());
         }
         return result;
     }
 
-    private static String rawPreview(String json) {
-        if (json.length() <= RAW_JSON_PREVIEW_LIMIT) {
+    private static String responsePreview(String json) {
+        if (json.length() <= RESPONSE_PREVIEW_LIMIT) {
             return json;
         }
-        return json.substring(0, RAW_JSON_PREVIEW_LIMIT) + "...";
+        return json.substring(0, RESPONSE_PREVIEW_LIMIT) + "...";
     }
 }

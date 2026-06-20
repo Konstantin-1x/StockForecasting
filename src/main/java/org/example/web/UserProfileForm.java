@@ -15,9 +15,6 @@ public class UserProfileForm {
     @Size(max = 180)
     private String email;
 
-    @Size(max = 60)
-    private String phone;
-
     @NotBlank
     @Size(max = 150)
     private String shopName;
@@ -40,9 +37,6 @@ public class UserProfileForm {
     @Size(max = 100)
     private String marketplaceSellerId;
 
-    @Size(max = 2000)
-    private String notes;
-
     public String getDisplayName() {
         return displayName;
     }
@@ -57,14 +51,6 @@ public class UserProfileForm {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
     }
 
     public String getShopName() {
@@ -115,11 +101,4 @@ public class UserProfileForm {
         this.marketplaceSellerId = marketplaceSellerId;
     }
 
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
 }

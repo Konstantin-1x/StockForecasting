@@ -171,28 +171,15 @@ public class CategoryCatalogService {
     }
 
     private CategoryCatalogItem toRootItem(CategoryNode root, CategoryNode selectedNode) {
-        List<CategoryCatalogItem> children = new ArrayList<>();
-        for (CategoryNode child : root.children()) {
-            flatten(child, 0, selectedNode, children);
-        }
-        return toItem(root, 0, selectedNode, true, children);
-    }
-
-    private void flatten(CategoryNode node,
-                         int depth,
-                         CategoryNode selectedNode,
-                         List<CategoryCatalogItem> result) {
-        result.add(toItem(node, depth, selectedNode, false, List.of()));
-        for (CategoryNode child : node.children()) {
-            flatten(child, depth + 1, selectedNode, result);
-        }
+        return toItem(root, 0, selectedNode);
     }
 
     private CategoryCatalogItem toItem(CategoryNode node,
                                        int depth,
-                                       CategoryNode selectedNode,
-                                       boolean rootItem,
-                                       List<CategoryCatalogItem> children) {
+                                       CategoryNode selectedNode) {
+        List<CategoryCatalogItem> children = node.children().stream()
+                .map(child -> toItem(child, depth + 1, selectedNode))
+                .toList();
         boolean selected = selectedNode != null && node.key().equals(selectedNode.key());
         boolean activeTrail = selectedNode != null && selectedNode.key().startsWith(node.key() + "/");
         return new CategoryCatalogItem(
@@ -202,7 +189,7 @@ public class CategoryCatalogService {
                 depth,
                 selected,
                 activeTrail,
-                rootItem ? !children.isEmpty() : node.hasChildren(),
+                !children.isEmpty(),
                 children
         );
     }

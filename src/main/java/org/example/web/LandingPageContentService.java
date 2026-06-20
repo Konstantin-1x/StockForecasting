@@ -66,7 +66,7 @@ public class LandingPageContentService {
         content.setKicker("ВКР · нейросетевое прогнозирование");
         content.setHeadline("Промо Прогноз для продавцов Wildberries");
         content.setDescription("Система собирает почасовые временные ряды товаров, хранит историю акционных показателей и строит прогноз будущей цены, времени до старта акции и остатка товара.");
-        content.setModelLabel("MLP");
+        content.setModelLabel("Промо сценарий");
         content.setDataSliceLabel("1 час");
         content.setSourceLabel("Wildberries");
         content.setSellerTitle("Для продавца");

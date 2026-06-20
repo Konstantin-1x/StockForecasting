@@ -5,133 +5,157 @@
     <section class="page-head">
         <div>
             <h1>Кабинет продавца</h1>
-            <p>Управляйте данными продавца, добавляйте товары и запускайте нейросетевой прогноз по своим артикулам.</p>
+            <p>Обзор товаров, прогнозов и быстрых действий по вашему магазину.</p>
         </div>
         <div class="page-actions">
-            <a class="btn btn--soft" th:href="@{/app/profile/edit}">Редактировать профиль</a>
             <a class="btn btn--soft" th:href="@{/app/products}">Товары</a>
             <a class="btn btn--soft" th:href="@{/app/forecasts}">Прогнозирование</a>
             <a class="btn" th:href="@{/app/products/new}">Добавить товар</a>
         </div>
     </section>
 
-    <section class="grid grid--3">
+    <section class="grid grid--4">
         <div class="card metric">
-            <div class="metric__label">Пользователь</div>
-            <div class="metric__value metric__value--text" th:text="${portalUser != null ? portalUser.displayName : 'Нет данных'}">Пользователь</div>
+            <div class="metric__label">Продавец</div>
+            <div class="metric__value metric__value--text" th:text="${seller != null ? seller.shopName : 'Профиль не заполнен'}">Продавец</div>
+            <div class="metric__hint" th:text="${'Статус: ' + sellerStatusLabel}">Статус: активен</div>
         </div>
         <div class="card metric">
-            <div class="metric__label">Товаров</div>
-            <div class="metric__value" th:text="${products.size()}">0</div>
+            <div class="metric__label">Товаров всего</div>
+            <div class="metric__value" th:text="${productCount}">0</div>
+            <div class="metric__hint">Добавлено товаров</div>
         </div>
         <div class="card metric">
-            <div class="metric__label">Прогнозов</div>
-            <div class="metric__value" th:text="${forecasts.size()}">0</div>
+            <div class="metric__label">Прогнозов всего</div>
+            <div class="metric__value" th:text="${forecastCount}">0</div>
+            <div class="metric__hint">Выполнено расчетов</div>
+        </div>
+        <div class="card metric">
+            <div class="metric__label">Товаров без прогноза</div>
+            <div class="metric__value" th:text="${unforecastedProductCount}">0</div>
+            <div class="metric__hint">Без прогноза</div>
+        </div>
+        <div class="card metric">
+            <div class="metric__label">Последний расчет</div>
+            <div class="metric__value metric__value--text" th:text="${lastForecastLabel}">Прогнозов пока нет</div>
+            <div class="metric__hint">Последний прогноз</div>
         </div>
     </section>
 
-    <section class="card action-card" style="margin-top: 18px;" th:if="${seller != null}">
+    <section class="card action-card" style="margin-top: 18px;" th:if="${seller == null}">
         <div class="action-card__head">
             <div>
-                <h2 th:text="${seller.shopName}">Магазин</h2>
-                <p th:text="${seller.notes ?: 'Профиль продавца создан при регистрации.'}">Описание</p>
+                <h2>Заполните профиль продавца</h2>
+                <p>После регистрации нужно указать магазин и контактные данные продавца. До этого добавление товаров и прогнозирование недоступны.</p>
             </div>
-            <span class="badge badge--ok" th:text="${seller.status}">ACTIVE</span>
-        </div>
-        <div class="details-grid">
-            <div><span>Контакт</span><strong th:text="${seller.contactName ?: '-'}">-</strong></div>
-            <div><span>Email</span><strong th:text="${seller.contactEmail ?: '-'}">-</strong></div>
-            <div><span>Телефон</span><strong th:text="${seller.contactPhone ?: '-'}">-</strong></div>
-            <div><span>ИНН</span><strong th:text="${seller.taxId ?: '-'}">-</strong></div>
-            <div><span>ID WB</span><strong th:text="${seller.marketplaceSellerId ?: '-'}">-</strong></div>
-        </div>
-    </section>
-
-    <section class="card action-card" style="margin-top: 18px;">
-        <div class="action-card__head">
-            <div>
-                <h2>Нейросетевое прогнозирование</h2>
-                <p>Модель обучается на временных рядах похожих WB-товаров из выбранной категории и строит прогноз для ваших товаров.</p>
-            </div>
-            <span class="badge"
-                  th:if="${neuralForecastJobStatus}"
-                  th:classappend="${neuralForecastJobStatus.running()} ? ' badge--warn' : ' badge--ok'"
-                  th:text="${neuralForecastJobStatus.running()} ? 'Фоновый админ-расчет' : 'Ручной запуск'">Ручной запуск</span>
+            <span class="badge badge--warn">Нужно заполнить</span>
         </div>
         <div class="action-card__actions">
-            <a class="btn" th:href="@{/app/forecasts}">Открыть прогнозирование</a>
-            <div class="muted" th:if="${neuralForecastJobStatus}" th:text="${neuralForecastJobStatus.message()}">Статус</div>
+            <a class="btn" th:href="@{/app/profile/edit}">Открыть профиль продавца</a>
         </div>
+    </section>
+
+    <section class="grid grid--2 admin-grid seller-dashboard-preview-grid" style="margin-top: 18px;">
+        <section class="card table-card latest-products-card">
+            <div class="table-toolbar">
+                <div>
+                    <div class="table-toolbar__title">Последние добавленные товары</div>
+                    <div class="table-toolbar__hint">Короткая выборка. Полный список находится в разделе «Товары».</div>
+                </div>
+                <a class="btn btn--soft" th:href="@{/app/products}">Смотреть все товары</a>
+            </div>
+            <div class="table-wrap" th:if="${!latestProducts.isEmpty()}">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Категория</th>
+                        <th>Артикул</th>
+                        <th>Наименование</th>
+                        <th>Базовая цена</th>
+                        <th>Остаток</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="product : ${latestProducts}">
+                        <td th:text="${product.category.name}">Категория</td>
+                        <td class="strong">
+                            <a th:href="${product.marketplaceUrl}" target="_blank" rel="noopener"
+                               th:text="${product.marketplaceArticle}">0</a>
+                        </td>
+                        <td th:text="${product.name}">Товар</td>
+                        <td th:text="${product.basePrice} + ' ₽'">0 ₽</td>
+                        <td th:text="${product.currentStock}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="empty" th:if="${latestProducts.isEmpty()}">
+                <p>У вас пока нет товаров.</p>
+                <a class="btn" th:href="@{/app/products/new}">Добавить товар</a>
+            </div>
+        </section>
+
+        <section class="card action-card recommendations-card">
+            <div class="action-card__head">
+                <div>
+                    <h2>Рекомендации</h2>
+                    <p>Что можно сделать сейчас на основе данных магазина.</p>
+                </div>
+                <span class="badge badge--ok">Подсказки</span>
+            </div>
+            <div class="recommendation-list">
+                <div class="recommendation-item" th:each="recommendation : ${dashboardRecommendations}">
+                    <span th:text="${recommendation.text()}">Рекомендация</span>
+                    <a class="btn btn--soft btn--sm"
+                       th:href="${recommendation.href()}"
+                       th:text="${recommendation.actionLabel()}">Открыть</a>
+                </div>
+            </div>
+        </section>
     </section>
 
     <section class="card table-card" style="margin-top: 18px;">
         <div class="table-toolbar">
             <div>
-                <div class="table-toolbar__title">Товары продавца</div>
-                <div class="table-toolbar__hint">Добавленные товары используются для привязки прогнозов к вашему кабинету.</div>
+                <div class="table-toolbar__title">Последние прогнозы</div>
+                <div class="table-toolbar__hint">Короткая выборка последних расчетов. Полная история находится в разделе «Прогнозирование».</div>
             </div>
-            <a class="btn btn--soft" th:href="@{/app/products/new}">Добавить товар</a>
+            <a class="btn btn--soft" th:href="@{/app/forecasts}">Смотреть все прогнозы</a>
         </div>
-        <div class="table-wrap" th:if="${!products.isEmpty()}">
-            <table>
-                <thead>
-                <tr>
-                    <th>Категория</th>
-                    <th>Артикул</th>
-                    <th>Наименование</th>
-                    <th>Базовая цена</th>
-                    <th>Остаток</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="product : ${products}">
-                    <td th:text="${product.category.name}">Категория</td>
-                    <td class="strong" th:text="${product.marketplaceArticle}">0</td>
-                    <td th:text="${product.name}">Товар</td>
-                    <td th:text="${product.basePrice} + ' ₽'">0 ₽</td>
-                    <td th:text="${product.currentStock}">0</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="empty" th:if="${products.isEmpty()}">Добавьте первый товар, чтобы привязать прогнозы к кабинету продавца.</div>
-    </section>
-
-    <section class="card table-card" style="margin-top: 18px;">
-        <div class="table-toolbar">
-            <div>
-                <div class="table-toolbar__title">Прогнозы</div>
-                <div class="table-toolbar__hint">Последние расчеты MLP-модели по товарам продавца.</div>
-            </div>
-        </div>
-        <div class="table-wrap" th:if="${!forecasts.isEmpty()}">
+        <div class="table-wrap" th:if="${!latestForecasts.isEmpty()}">
             <table>
                 <thead>
                 <tr>
                     <th>Дата</th>
                     <th>Товар</th>
+                    <th>Бюджет</th>
                     <th>Ставка за отзыв</th>
-                    <th>До старта</th>
-                    <th>Остаток</th>
+                    <th>План отзывов</th>
+                    <th>Срок реализации</th>
                     <th>Качество</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="forecast : ${forecasts}">
+                <tr th:each="forecast : ${latestForecasts}">
                     <td th:text="${forecast.calculatedAtLabel}">Дата</td>
                     <td>
                         <div class="strong" th:text="${forecast.displayProductName}">Товар</div>
-                        <div class="muted" th:text="${'WB: ' + forecast.displayMarketplaceArticle}">WB</div>
+                        <a class="muted" th:href="${forecast.displayMarketplaceUrl}" target="_blank" rel="noopener"
+                           th:text="${'WB: ' + forecast.displayMarketplaceArticle}">WB</a>
                     </td>
+                    <td th:text="${forecast.promotionBudgetLabel ?: '-'}">0 ₽</td>
                     <td th:text="${forecast.promotionCostForecastLabel}">0 ₽</td>
-                    <td th:text="${forecast.promotionStartLabel}">0 ч.</td>
-                    <td th:text="${forecast.promotionStockLabel}">0</td>
+                    <td th:text="${forecast.promotionPurchaseForecast ?: '-'}">0</td>
+                    <td th:text="${forecast.predictedSelloutLabel}">0 д.</td>
                     <td th:text="${forecast.confidenceLabel}">0%</td>
                 </tr>
                 </tbody>
             </table>
         </div>
-        <div class="empty" th:if="${forecasts.isEmpty()}">Для ваших товаров пока нет прогнозов.</div>
+        <div class="empty" th:if="${latestForecasts.isEmpty()}">
+            <p>Прогнозы пока не выполнялись.</p>
+            <a class="btn" th:href="@{/app/forecasts}">Рассчитать прогноз</a>
+        </div>
     </section>
 </main>
 </html>

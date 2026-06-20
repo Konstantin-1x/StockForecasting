@@ -9,43 +9,14 @@
         </div>
     </section>
 
-    <section class="offers-workspace">
-        <aside class="card catalog-panel">
-            <div class="catalog-panel__head">
-                <div class="catalog-panel__title">Каталог</div>
-                <a class="catalog-reset"
-                   th:classappend="${selectedCategoryKey == null} ? ' catalog-reset--active'"
-                   th:href="@{/admin/offers}">Все товары</a>
-            </div>
-
-            <div class="catalog-menu">
-                <div class="catalog-root"
-                     th:each="category : ${catalog.rootCategories}"
-                     th:classappend="${category.selected || category.activeTrail} ? ' catalog-root--active'">
-                    <a class="catalog-link"
-                       th:href="@{/admin/offers(categoryKey=${category.key})}"
-                       th:classappend="${category.selected || category.activeTrail} ? ' catalog-link--active'">
-                        <span th:text="${category.name}">Категория</span>
-                        <span class="catalog-link__arrow" th:if="${category.hasChildren}">›</span>
-                    </a>
-                    <div class="catalog-flyout" th:if="${!category.children.isEmpty()}">
-                        <a class="catalog-link catalog-link--child"
-                           th:each="child : ${category.children}"
-                           th:href="@{/admin/offers(categoryKey=${child.key})}"
-                           th:style="'--depth: ' + ${child.depth}"
-                           th:classappend="${child.selected || child.activeTrail} ? ' catalog-link--active'">
-                            <span th:text="${child.name}">Подкатегория</span>
-                            <span class="catalog-link__arrow" th:if="${child.hasChildren}">›</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </aside>
-
+    <section class="offers-workspace offers-workspace--single">
         <section class="card table-card offers-table-card">
             <div class="table-toolbar">
                 <div>
-                    <div class="table-toolbar__title">Предложения Wildberries</div>
+                    <div class="table-toolbar__title table-toolbar__title--inline">
+                        <span>Предложения Wildberries</span>
+                        <button class="btn btn--soft" type="button" data-catalog-open>Каталог</button>
+                    </div>
                     <div class="table-toolbar__hint"
                          th:text="${catalog.selectedCategoryName == null}
                          ? 'Показаны все товары, по 100 записей на страницу.'
@@ -53,7 +24,9 @@
                         Показаны все товары, по 100 записей на страницу.
                     </div>
                 </div>
-                <span class="badge" th:text="${offerPage.totalElements} + ' товаров'">0 товаров</span>
+                <div class="table-toolbar__actions">
+                    <span class="badge" th:text="${offerPage.totalElements} + ' товаров'">0 товаров</span>
+                </div>
             </div>
             <div class="table-wrap" th:if="${!offers.isEmpty()}">
                 <table>
@@ -80,7 +53,7 @@
                         <td th:text="${offer.productName}">Товар</td>
                         <td>
                             <a class="btn btn--soft btn--sm"
-                               th:href="@{/api/parser/wildberries/product/test(article=${offer.marketplaceArticle}, includeRawPreview=false)}"
+                               th:href="@{/api/parser/wildberries/product/test(article=${offer.marketplaceArticle}, includeResponsePreview=false)}"
                                target="_blank"
                                rel="noopener">Данные</a>
                         </td>
@@ -122,118 +95,57 @@
         </section>
     </section>
 
+    <div class="catalog-modal-backdrop" data-catalog-modal hidden>
+        <section class="catalog-modal" role="dialog" aria-modal="true" aria-labelledby="offerCatalogTitle">
+            <div class="catalog-modal__head">
+                <div>
+                    <h2 id="offerCatalogTitle">Каталог WB</h2>
+                    <p>Выберите родительскую категорию, затем наведите курсор на нужный раздел.</p>
+                </div>
+                <button class="icon-button" type="button" data-catalog-close aria-label="Закрыть каталог">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+            <div class="catalog-browser">
+                <a class="catalog-link"
+                   th:classappend="${selectedCategoryKey == null} ? ' catalog-link--active'"
+                   th:href="@{/admin/offers}">Все товары</a>
+                <div class="catalog-menu catalog-menu--dropdown">
+                    <th:block th:replace="~{catalog-fragments :: offerCatalogItems(${catalog.rootCategories})}"></th:block>
+                </div>
+            </div>
+        </section>
+    </div>
+
     <script>
         (() => {
-            const roots = Array.from(document.querySelectorAll(".catalog-root"));
-            const compactView = () => window.matchMedia("(max-width: 920px)").matches;
-            const gap = 12;
-            const closeDelayMs = 500;
-            let activeRoot = null;
-            let closeTimer = null;
-
-            function clearCloseTimer() {
-                if (closeTimer !== null) {
-                    window.clearTimeout(closeTimer);
-                    closeTimer = null;
-                }
+            const modal = document.querySelector("[data-catalog-modal]");
+            const openButton = document.querySelector("[data-catalog-open]");
+            const closeButton = document.querySelector("[data-catalog-close]");
+            if (!modal || !openButton) {
+                return;
             }
 
-            function pointerInside(root) {
-                const flyout = root.querySelector(".catalog-flyout");
-                return root.matches(":hover") || Boolean(flyout && flyout.matches(":hover"));
+            function openCatalog() {
+                modal.hidden = false;
+                document.body.classList.add("body--modal-open");
             }
 
-            function positionFlyout(root) {
-                const flyout = root.querySelector(".catalog-flyout");
-                if (!flyout || compactView()) {
-                    return;
-                }
-
-                const rootRect = root.getBoundingClientRect();
-                const width = Math.min(360, Math.max(300, flyout.offsetWidth || 330));
-                const maxHeight = Math.max(240, window.innerHeight - gap * 2);
-
-                flyout.style.width = `${width}px`;
-                flyout.style.maxHeight = `${maxHeight}px`;
-
-                const height = Math.min(flyout.scrollHeight, maxHeight);
-                let left = rootRect.right + 6;
-                if (left + width > window.innerWidth - gap) {
-                    left = Math.max(gap, rootRect.left - width - 6);
-                }
-
-                const maxTop = window.innerHeight - height - gap;
-                const top = Math.max(gap, Math.min(rootRect.top - 8, maxTop));
-
-                flyout.style.left = `${left}px`;
-                flyout.style.top = `${top}px`;
+            function closeCatalog() {
+                modal.hidden = true;
+                document.body.classList.remove("body--modal-open");
             }
 
-            function openRoot(root) {
-                if (compactView()) {
-                    return;
-                }
-                if (activeRoot && activeRoot !== root) {
-                    closeRootNow(activeRoot);
-                }
-                clearCloseTimer();
-                activeRoot = root;
-                root.classList.add("catalog-root--open");
-                positionFlyout(root);
-            }
-
-            function closeRootNow(root) {
-                clearCloseTimer();
-                root.classList.remove("catalog-root--open");
-                if (activeRoot === root) {
-                    activeRoot = null;
-                }
-            }
-
-            function scheduleClose(root) {
-                if (compactView()) {
-                    return;
-                }
-                clearCloseTimer();
-                closeTimer = window.setTimeout(() => {
-                    closeTimer = null;
-                    if (!pointerInside(root)) {
-                        closeRootNow(root);
-                    }
-                }, closeDelayMs);
-            }
-
-            roots.forEach((root) => {
-                const flyout = root.querySelector(".catalog-flyout");
-
-                root.addEventListener("mouseenter", () => openRoot(root));
-                root.addEventListener("focusin", () => openRoot(root));
-                root.addEventListener("mouseleave", () => scheduleClose(root));
-                root.addEventListener("focusout", (event) => {
-                    if (!(event.relatedTarget instanceof Node) || !root.contains(event.relatedTarget)) {
-                        scheduleClose(root);
-                    }
-                });
-
-                if (flyout) {
-                    flyout.addEventListener("mouseenter", () => {
-                        clearCloseTimer();
-                        openRoot(root);
-                    });
-                    flyout.addEventListener("mouseleave", () => scheduleClose(root));
+            openButton.addEventListener("click", openCatalog);
+            closeButton?.addEventListener("click", closeCatalog);
+            modal.addEventListener("click", (event) => {
+                if (event.target === modal) {
+                    closeCatalog();
                 }
             });
-
-            window.addEventListener("resize", () => {
-                if (activeRoot) {
-                    positionFlyout(activeRoot);
-                }
+            modal.querySelectorAll(".catalog-link").forEach((link) => {
+                link.addEventListener("click", closeCatalog);
             });
-            document.addEventListener("scroll", () => {
-                if (activeRoot) {
-                    positionFlyout(activeRoot);
-                }
-            }, true);
         })();
     </script>
 </main>

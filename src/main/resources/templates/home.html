@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Промо Прогноз</title>
-    <link rel="stylesheet" th:href="@{/css/app.css(v='20260517-1')}">
+    <link rel="stylesheet" th:href="@{/css/app.css(v='20260614-2')}">
 </head>
 <body class="public-page">
 <main class="public-shell public-shell--wide">
@@ -28,15 +28,15 @@
 
         <div class="public-summary">
             <div class="summary-row">
-                <span>Модель</span>
-                <strong th:text="${landingPage.modelLabel}">MLP</strong>
+                <span>Результат</span>
+                <strong>План акции</strong>
             </div>
             <div class="summary-row">
-                <span>Срез данных</span>
+                <span>Данные</span>
                 <strong th:text="${landingPage.dataSliceLabel}">1 час</strong>
             </div>
             <div class="summary-row">
-                <span>Источник</span>
+                <span>Направление</span>
                 <strong th:text="${landingPage.sourceLabel}">Wildberries</strong>
             </div>
         </div>
@@ -55,6 +55,52 @@
             <h2 th:text="${landingPage.researchTitle}">Для исследования</h2>
             <p th:text="${landingPage.researchDescription}">История строится как временной ряд, чтобы модель обучалась на динамике цены, остатка и акции.</p>
         </article>
+    </section>
+    <section class="public-section">
+        <div class="public-section__head">
+            <span class="public-kicker">Процесс</span>
+            <h2>От товара к рекомендованному сценарию акции</h2>
+            <p>Система помогает оценить, какую ставку за отзыв выбрать, сколько отзывов можно собрать и какой запас товара нужен для безопасного запуска.</p>
+        </div>
+        <div class="public-process">
+            <article>
+                <span>1</span>
+                <h3>Выбор товара</h3>
+                <p>Продавец добавляет свой артикул, цену, категорию и текущий остаток.</p>
+            </article>
+            <article>
+                <span>2</span>
+                <h3>Подбор аналогов</h3>
+                <p>Модель ищет похожие товары в той же или смежной категории, чтобы не обучаться на лишних данных.</p>
+            </article>
+            <article>
+                <span>3</span>
+                <h3>Расчет прогноза</h3>
+                <p>На выходе появляется прозрачный план: бюджет, ставка, ожидаемые отзывы, срок и доверие модели.</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="public-section public-section--split">
+        <div>
+            <span class="public-kicker">Данные</span>
+            <h2>Что учитывается в прогнозе</h2>
+            <p>Прогноз опирается на историю цены, остатков, вознаграждений за отзыв, динамику продаж и поведение товаров-аналогов.</p>
+        </div>
+        <div class="public-factors">
+            <div><strong>Цена и скидка</strong><span>оценка диапазона без ухода в убыточные сценарии</span></div>
+            <div><strong>Остаток</strong><span>проверка, хватит ли товара на период акции</span></div>
+            <div><strong>Отзывы</strong><span>расчет количества отзывов по заданному бюджету</span></div>
+            <div><strong>Похожие категории</strong><span>обучение на ограниченной, но релевантной выборке</span></div>
+        </div>
+    </section>
+
+    <section class="public-section public-section--muted">
+        <div class="public-section__head">
+            <span class="public-kicker">Результат</span>
+            <h2>Для демонстрации и для реального кабинета</h2>
+            <p>Администратор видит качество данных, статус сбора и все расчеты. Продавец видит только свои товары и прогнозы, поэтому интерфейс остается понятным и быстрым.</p>
+        </div>
     </section>
 </main>
 </body>

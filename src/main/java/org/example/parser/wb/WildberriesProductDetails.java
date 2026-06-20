@@ -14,8 +14,7 @@ public record WildberriesProductDetails(
         BigDecimal rating,
         Integer reviewsCount,
         String cardUrl,
-        String detailUrl,
-        String rawJson
+        String detailUrl
 ) {
     public BigDecimal benefitPercent() {
         if (price == null || feedbackReward == null || price.signum() == 0) {

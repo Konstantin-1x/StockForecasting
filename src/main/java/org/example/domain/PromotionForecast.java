@@ -234,6 +234,14 @@ public class PromotionForecast {
         return "";
     }
 
+    public String getDisplayMarketplaceUrl() {
+        String article = getDisplayMarketplaceArticle();
+        if (article == null || article.isBlank()) {
+            return "";
+        }
+        return "https://www.wildberries.ru/catalog/" + article.trim() + "/detail.aspx";
+    }
+
     public String getPromotionStartLabel() {
         if (promotionStartHoursForecast == null) {
             return "";
@@ -296,6 +304,6 @@ public class PromotionForecast {
     }
 
     private static String moneyLabel(BigDecimal value) {
-        return value == null ? "" : value.setScale(0, RoundingMode.HALF_UP).toPlainString() + " ₽";
+        return value == null ? "" : value.setScale(0, RoundingMode.HALF_UP).toPlainString() + "\u00A0\u20BD";
     }
 }

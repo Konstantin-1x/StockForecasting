@@ -16,8 +16,8 @@ public record WildberriesProductDetailTestResult(
         BigDecimal benefitPercent,
         BigDecimal rating,
         Integer reviewsCount,
-        int rawJsonLength,
-        String rawJsonPreview,
+        int responseLength,
+        String responsePreview,
         Instant checkedAt
 ) {
 }

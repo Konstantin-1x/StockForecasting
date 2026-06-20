@@ -4,58 +4,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${title} + ' - Промо Прогноз'">Промо Прогноз</title>
-    <link rel="stylesheet" th:href="@{/css/app.css(v='20260519-1')}">
+    <link rel="stylesheet" th:href="@{/css/app.css(v='20260614-2')}">
 </head>
 <body>
 <div class="shell">
     <aside class="sidebar">
         <div class="brand">
+            <div class="brand__mark">П</div>
             <div class="brand__title">Промо Прогноз</div>
-            <div class="brand__subtitle">Spring Boot + PostgreSQL</div>
         </div>
 
         <nav class="nav">
             <a th:if="${!authenticated || adminUser}"
                th:href="@{/}" class="nav__link"
-               th:classappend="${active == 'home'} ? ' nav__link--active'">Стартовая</a>
+               th:classappend="${active == 'home'} ? ' nav__link--active'">
+                <svg class="nav__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Стартовая</span></a>
             <th:block th:if="${authenticated && !adminUser}">
-                <a th:href="@{/app}" class="nav__link" th:classappend="${active == 'user'} ? ' nav__link--active'">Кабинет продавца</a>
-                <a th:href="@{/app/products}" class="nav__link" th:classappend="${active == 'user-products'} ? ' nav__link--active'">Товары</a>
-                <a th:href="@{/app/forecasts}" class="nav__link" th:classappend="${active == 'user-forecasts'} ? ' nav__link--active'">Прогнозирование</a>
-                <a th:href="@{/app/profile/edit}" class="nav__link" th:classappend="${active == 'user-profile'} ? ' nav__link--active'">Профиль продавца</a>
+                <a th:href="@{/app}" class="nav__link" th:classappend="${active == 'user'} ? ' nav__link--active'">
+                    <svg class="nav__icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg><span>Кабинет продавца</span></a>
+                <a th:href="@{/app/products}" class="nav__link" th:classappend="${active == 'user-products'} ? ' nav__link--active'">
+                    <svg class="nav__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg><span>Товары</span></a>
+                <a th:href="@{/app/forecasts}" class="nav__link" th:classappend="${active == 'user-forecasts'} ? ' nav__link--active'">
+                    <svg class="nav__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg><span>Прогнозирование</span></a>
             </th:block>
             <th:block th:if="${adminUser}">
-                <a th:href="@{/admin}" class="nav__link" th:classappend="${active == 'admin'} ? ' nav__link--active'">Админ-панель</a>
-                <a th:href="@{/admin/users}" class="nav__link" th:classappend="${active == 'users'} ? ' nav__link--active'">Пользователи</a>
-                <a th:href="@{/admin/offers}" class="nav__link" th:classappend="${active == 'offers'} ? ' nav__link--active'">Предложения WB</a>
-                <a th:href="@{/admin/products}" class="nav__link" th:classappend="${active == 'products'} ? ' nav__link--active'">Товары продавцов</a>
-                <a th:href="@{/admin/forecasts}" class="nav__link" th:classappend="${active == 'forecasts'} ? ' nav__link--active'">Нейропрогнозы</a>
-                <a th:href="@{/admin/data-quality}" class="nav__link" th:classappend="${active == 'data-quality'} ? ' nav__link--active'">Качество данных</a>
+                <a th:href="@{/admin/diagnostics}" class="nav__link" th:classappend="${active == 'diagnostics'} ? ' nav__link--active'">
+                    <svg class="nav__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span>Диагностика</span></a>
+                <a th:href="@{/admin}" class="nav__link" th:classappend="${active == 'admin'} ? ' nav__link--active'">
+                    <svg class="nav__icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg><span>Админ-панель</span></a>
+                <a th:href="@{/admin/users}" class="nav__link" th:classappend="${active == 'users'} ? ' nav__link--active'">
+                    <svg class="nav__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Пользователи</span></a>
+                <a th:href="@{/admin/offers}" class="nav__link" th:classappend="${active == 'offers'} ? ' nav__link--active'">
+                    <svg class="nav__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.59 13.41 11 3H4v7l9.59 9.59a2 2 0 0 0 2.82 0l4.18-4.18a2 2 0 0 0 0-2.82Z"/><path d="M7 7h.01"/></svg><span>Предложения WB</span></a>
+                <a th:href="@{/admin/products}" class="nav__link" th:classappend="${active == 'products'} ? ' nav__link--active'">
+                    <svg class="nav__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg><span>Товары продавцов</span></a>
+                <a th:href="@{/admin/forecasts}" class="nav__link" th:classappend="${active == 'forecasts'} ? ' nav__link--active'">
+                    <svg class="nav__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg><span>Нейропрогнозы</span></a>
+                <a th:href="@{/admin/data-quality}" class="nav__link" th:classappend="${active == 'data-quality'} ? ' nav__link--active'">
+                    <svg class="nav__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Качество данных</span></a>
             </th:block>
         </nav>
 
-        <div class="sidebar-tools" th:if="${adminUser}">
-            <div class="sidebar-tools__label">Сервис</div>
-            <a class="nav__link nav__link--tool" th:href="@{/api/parser/wildberries/diagnostics}">Диагностика</a>
+        <div class="sidebar-bottom" th:if="${authenticated}">
+            <a class="sidebar-profile-link"
+               th:if="${!adminUser}"
+               th:href="@{/app/profile/edit}"
+               th:classappend="${active == 'user-profile'} ? ' sidebar-profile-link--active'">
+                <svg class="nav__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/></svg>
+                <span>Профиль продавца</span>
+            </a>
+
+            <section class="sidebar-account">
+                <div class="avatar" th:text="${#strings.substring(currentUsername, 0, 1)}">A</div>
+                <div class="sidebar-account__body">
+                    <div class="sidebar-account__name" th:text="${currentUsername}">admin</div>
+                    <div class="sidebar-account__role" th:text="${adminUser} ? 'Администратор' : 'Пользователь'">Администратор</div>
+                </div>
+                <form class="logout-form profile-logout" th:action="@{/logout}" method="post">
+                    <input th:if="${_csrf != null}" type="hidden"
+                           th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button class="icon-button" type="submit" title="Выйти" aria-label="Выйти">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+                    </button>
+                </form>
+            </section>
         </div>
 
-        <div class="sidebar__footer">2026 Промо Прогноз</div>
+        <div class="sidebar__footer" th:if="${!authenticated}">2026 Промо Прогноз</div>
     </aside>
 
     <div class="content">
-        <header class="topbar">
-            <div class="topbar__inner">
-                <div class="topbar__title" th:text="${title}">Панель</div>
-                <div class="topbar__actions">
-                    <a class="btn" th:if="${!authenticated}" th:href="@{/login}">Войти</a>
-                    <form class="logout-form" th:if="${authenticated}" th:action="@{/logout}" method="post">
-                        <span class="topbar__user" th:text="${currentUsername}">admin</span>
-                        <input th:if="${_csrf != null}" type="hidden"
-                               th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                        <button class="btn btn--soft" type="submit">Выйти</button>
-                    </form>
-                </div>
-            </div>
+        <header class="topbar" th:if="${!authenticated}">
+            <a class="btn" th:if="${!authenticated}" th:href="@{/login}">Войти</a>
         </header>
 
         <main class="page">
@@ -64,6 +84,283 @@
             <th:block th:replace="${content}"></th:block>
         </main>
     </div>
+
 </div>
+<script>
+    (() => {
+        function closeModal(modal) {
+            modal.remove();
+        }
+
+        function formatMoney(value) {
+            const number = Number(value || 0);
+            return `${Math.round(number).toLocaleString("ru-RU")} ₽`;
+        }
+
+        function scenarioMarkup(scenario) {
+            if (!scenario || Object.keys(scenario).length === 0) {
+                return "";
+            }
+            const reward = Number(scenario.reviewReward || 0);
+            const budget = Number(scenario.budget || 0);
+            const reviews = Number(scenario.plannedReviews || 0);
+            const collectionDays = Number(scenario.collectionDays || 0);
+            const confidence = Number(scenario.confidencePercent || 0);
+
+            return `
+                <div class="forecast-summary">
+                    <div class="forecast-summary__hero">
+                        <span>Товар</span>
+                        <strong>${scenario.productName || "Выбранный товар"}</strong>
+                    </div>
+                    <div class="forecast-kpis">
+                        <div><span>Ставка за отзыв</span><strong>${formatMoney(reward)}</strong></div>
+                        <div><span>План отзывов</span><strong>${reviews.toLocaleString("ru-RU")}</strong></div>
+                        <div><span>Срок реализации</span><strong>${collectionDays} д.</strong></div>
+                        <div><span>Бюджет</span><strong>${formatMoney(budget)}</strong></div>
+                    </div>
+                    <div class="forecast-summary__footer">
+                        <span>Уверенность модели: <strong>${confidence.toFixed(0)}%</strong></span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showAsyncModal(success, message, redirectUrl, scenario, refreshOnClose = false) {
+            const modal = document.createElement("div");
+            modal.className = "modal-backdrop";
+            modal.innerHTML = `
+                <section class="result-modal ${success ? "result-modal--success result-modal--forecast" : "result-modal--error"}">
+                    <div class="result-modal__icon">
+                        ${success
+                            ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>'
+                            : '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>'}
+                    </div>
+                    <div>
+                        <h2>${success && scenario ? "Прогноз готов" : (success ? "Готово" : "Запрос не выполнен")}</h2>
+                        <p></p>
+                    </div>
+                    ${success ? scenarioMarkup(scenario) : ""}
+                    <button class="btn btn--soft" type="button">${redirectUrl ? "Открыть" : "Закрыть"}</button>
+                </section>
+            `;
+            modal.querySelector("p").textContent = success && scenario
+                ? "Рекомендованный сценарий промо акции"
+                : (message || (success ? "Данные сохранены." : "Попробуйте повторить запрос."));
+            modal.querySelector("button").addEventListener("click", () => {
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                    return;
+                }
+                if (refreshOnClose) {
+                    window.location.reload();
+                    return;
+                }
+                closeModal(modal);
+            });
+            modal.addEventListener("click", (event) => {
+                if (event.target === modal && !redirectUrl) {
+                    if (refreshOnClose) {
+                        window.location.reload();
+                        return;
+                    }
+                    closeModal(modal);
+                }
+            });
+            document.body.append(modal);
+        }
+
+        function setupPasswordToggles(root = document) {
+            root.querySelectorAll(".password-toggle").forEach((button) => {
+                if (button.dataset.ready === "true") {
+                    return;
+                }
+                button.dataset.ready = "true";
+                button.addEventListener("click", () => {
+                    const input = button.closest(".password-field")?.querySelector("input");
+                    if (!input) {
+                        return;
+                    }
+                    input.type = input.type === "password" ? "text" : "password";
+                    button.setAttribute("aria-label", input.type === "password" ? "Показать пароль" : "Скрыть пароль");
+                });
+            });
+        }
+
+        function setupCatalogMenus(root = document) {
+            root.querySelectorAll(".catalog-browser").forEach((browser) => {
+                if (browser.dataset.catalogReady === "true") {
+                    return;
+                }
+                browser.dataset.catalogReady = "true";
+                const closeTimers = new WeakMap();
+
+                function clearCloseTimer(node) {
+                    const timer = closeTimers.get(node);
+                    if (timer) {
+                        window.clearTimeout(timer);
+                    }
+                }
+
+                function closeNode(node) {
+                    node.classList.remove("catalog-node--open");
+                    const submenu = directSubmenu(node);
+                    if (submenu) {
+                        submenu.classList.remove("catalog-submenu--flip");
+                        submenu.style.removeProperty("--catalog-submenu-left");
+                        submenu.style.removeProperty("--catalog-submenu-top");
+                        submenu.style.removeProperty("--catalog-submenu-max-height");
+                    }
+                    node.querySelectorAll(".catalog-node--open").forEach((childNode) => closeNode(childNode));
+                }
+
+                function scheduleClose(node, delay = 1500) {
+                    clearCloseTimer(node);
+                    closeTimers.set(node, window.setTimeout(() => closeNode(node), delay));
+                }
+
+                function directSubmenu(node) {
+                    return Array.from(node.children).find((child) => child.classList?.contains("catalog-submenu"));
+                }
+
+                function directLink(node) {
+                    return Array.from(node.children).find((child) => child.classList?.contains("catalog-link"));
+                }
+
+                function openAncestors(node) {
+                    let current = node.parentElement?.closest(".catalog-node");
+                    while (current) {
+                        clearCloseTimer(current);
+                        current.classList.add("catalog-node--open");
+                        current = current.parentElement?.closest(".catalog-node");
+                    }
+                }
+
+                function closeSiblings(node) {
+                    const parentMenu = node.parentElement;
+                    if (!parentMenu) {
+                        return;
+                    }
+                    Array.from(parentMenu.children)
+                        .filter((sibling) => sibling !== node && sibling.classList?.contains("catalog-node"))
+                        .forEach((sibling) => closeNode(sibling));
+                }
+
+                function positionSubmenu(node) {
+                    const submenu = directSubmenu(node);
+                    const link = directLink(node);
+                    if (!submenu || !link) {
+                        return;
+                    }
+                    submenu.classList.remove("catalog-submenu--flip");
+                    window.requestAnimationFrame(() => {
+                        const linkRect = link.getBoundingClientRect();
+                        const gap = 8;
+                        const viewportPadding = 10;
+                        const desktopCascade = window.innerWidth >= 1024;
+                        const width = Math.max(250, Math.min(300, submenu.offsetWidth || 270));
+                        const height = Math.min(
+                            submenu.scrollHeight || submenu.offsetHeight || 320,
+                            window.innerHeight - viewportPadding * 2
+                        );
+                        let left = linkRect.right + gap;
+                        let top = linkRect.top;
+                        if (desktopCascade
+                                && left + width > window.innerWidth - viewportPadding
+                                && height <= 220
+                                && linkRect.bottom + gap + height <= window.innerHeight - viewportPadding) {
+                            left = Math.min(
+                                    Math.max(viewportPadding, linkRect.left),
+                                    window.innerWidth - width - viewportPadding
+                            );
+                            top = linkRect.bottom + gap;
+                        }
+                        if (!desktopCascade && left + width > window.innerWidth - viewportPadding) {
+                            left = Math.max(viewportPadding, linkRect.left - width - gap);
+                            submenu.classList.add("catalog-submenu--flip");
+                        }
+                        if (top + height > window.innerHeight - viewportPadding) {
+                            top = Math.max(viewportPadding, window.innerHeight - height - viewportPadding);
+                        }
+                        submenu.style.setProperty("--catalog-submenu-left", `${left}px`);
+                        submenu.style.setProperty("--catalog-submenu-top", `${top}px`);
+                        submenu.style.setProperty("--catalog-submenu-max-height", `${height}px`);
+                    });
+                }
+
+                function openNode(node) {
+                    clearCloseTimer(node);
+                    openAncestors(node);
+                    closeSiblings(node);
+                    node.classList.add("catalog-node--open");
+                    positionSubmenu(node);
+                }
+
+                browser.addEventListener("scroll", () => {
+                    browser.querySelectorAll(".catalog-node--open").forEach(positionSubmenu);
+                }, true);
+                window.addEventListener("resize", () => {
+                    browser.querySelectorAll(".catalog-node--open").forEach(positionSubmenu);
+                });
+
+                browser.querySelectorAll(".catalog-node").forEach((node) => {
+                    const submenu = directSubmenu(node);
+                    if (!submenu) {
+                        return;
+                    }
+                    node.addEventListener("mouseenter", () => {
+                        openNode(node);
+                    });
+                    node.addEventListener("mouseleave", () => scheduleClose(node));
+                    submenu.addEventListener("mouseenter", () => {
+                        clearCloseTimer(node);
+                        openAncestors(node);
+                    });
+                    submenu.addEventListener("mouseleave", () => scheduleClose(node));
+                    node.addEventListener("focusin", () => {
+                        openNode(node);
+                    });
+                });
+            });
+        }
+
+        setupPasswordToggles();
+        setupCatalogMenus();
+
+        document.addEventListener("submit", async (event) => {
+            const form = event.target;
+            if (!(form instanceof HTMLFormElement) || !form.classList.contains("async-form")) {
+                return;
+            }
+
+            event.preventDefault();
+            const submitter = form.querySelector('button[type="submit"], input[type="submit"]');
+            if (submitter) {
+                submitter.disabled = true;
+            }
+
+            try {
+                const response = await fetch(form.action, {
+                    method: form.method || "POST",
+                    body: new FormData(form),
+                    headers: {
+                        "Accept": "application/json",
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                });
+                const data = await response.json();
+                const success = response.ok && data.success !== false;
+                const refreshOnClose = success && (data.refresh === true || form.dataset.refreshOnSuccess === "true");
+                showAsyncModal(success, data.message, data.redirectUrl || form.dataset.successUrl, data.scenario, refreshOnClose);
+            } catch (error) {
+                showAsyncModal(false, "Не удалось отправить запрос на сервер.");
+            } finally {
+                if (submitter) {
+                    submitter.disabled = false;
+                }
+            }
+        });
+    })();
+</script>
 </body>
 </html>

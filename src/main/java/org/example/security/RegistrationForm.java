@@ -15,6 +15,10 @@ public class RegistrationForm {
     private String password;
 
     @NotBlank
+    @Size(min = 6, max = 80)
+    private String passwordConfirmation;
+
+    @NotBlank
     @Size(max = 150)
     private String displayName;
 
@@ -22,34 +26,6 @@ public class RegistrationForm {
     @Email
     @Size(max = 180)
     private String email;
-
-    @Size(max = 60)
-    private String phone;
-
-    @NotBlank
-    @Size(max = 150)
-    private String shopName;
-
-    @NotBlank
-    @Size(max = 150)
-    private String contactName;
-
-    @NotBlank
-    @Email
-    @Size(max = 180)
-    private String contactEmail;
-
-    @Size(max = 60)
-    private String contactPhone;
-
-    @Size(max = 40)
-    private String taxId;
-
-    @Size(max = 100)
-    private String marketplaceSellerId;
-
-    @Size(max = 2000)
-    private String notes;
 
     public String getUsername() {
         return username;
@@ -65,6 +41,14 @@ public class RegistrationForm {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getPasswordConfirmation() {
+        return passwordConfirmation;
+    }
+
+    public void setPasswordConfirmation(String passwordConfirmation) {
+        this.passwordConfirmation = passwordConfirmation;
     }
 
     public String getDisplayName() {
@@ -83,67 +67,4 @@ public class RegistrationForm {
         this.email = email;
     }
 
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getShopName() {
-        return shopName;
-    }
-
-    public void setShopName(String shopName) {
-        this.shopName = shopName;
-    }
-
-    public String getContactName() {
-        return contactName;
-    }
-
-    public void setContactName(String contactName) {
-        this.contactName = contactName;
-    }
-
-    public String getContactEmail() {
-        return contactEmail;
-    }
-
-    public void setContactEmail(String contactEmail) {
-        this.contactEmail = contactEmail;
-    }
-
-    public String getContactPhone() {
-        return contactPhone;
-    }
-
-    public void setContactPhone(String contactPhone) {
-        this.contactPhone = contactPhone;
-    }
-
-    public String getTaxId() {
-        return taxId;
-    }
-
-    public void setTaxId(String taxId) {
-        this.taxId = taxId;
-    }
-
-    public String getMarketplaceSellerId() {
-        return marketplaceSellerId;
-    }
-
-    public void setMarketplaceSellerId(String marketplaceSellerId) {
-        this.marketplaceSellerId = marketplaceSellerId;
-    }
-
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
 }

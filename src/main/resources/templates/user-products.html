@@ -16,7 +16,7 @@
     <section class="grid grid--3">
         <div class="card metric">
             <div class="metric__label">Всего товаров</div>
-            <div class="metric__value" th:text="${products.size()}">0</div>
+            <div class="metric__value" th:text="${productCount}">0</div>
         </div>
         <div class="card metric">
             <div class="metric__label">Магазин</div>
@@ -50,7 +50,10 @@
                 <tbody>
                 <tr th:each="product : ${products}">
                     <td th:text="${product.category.name}">Категория</td>
-                    <td class="strong" th:text="${product.marketplaceArticle}">0</td>
+                    <td class="strong">
+                        <a th:href="${product.marketplaceUrl}" target="_blank" rel="noopener"
+                           th:text="${product.marketplaceArticle}">0</a>
+                    </td>
                     <td>
                         <div class="strong" th:text="${product.name}">Товар</div>
                         <div class="muted" th:if="${product.description}" th:text="${product.description}">Описание</div>
@@ -62,6 +65,27 @@
                 </tbody>
             </table>
         </div>
+        <nav class="pagination" th:if="${productPage.totalPages > 1}">
+            <a class="pagination__link"
+               th:if="${!productPage.first}"
+               th:href="@{/app/products(page=${productPage.number - 1})}">Назад</a>
+            <span class="pagination__link pagination__link--disabled" th:if="${productPage.first}">Назад</span>
+            <div class="pagination__pages">
+                <th:block th:each="pageNumber : ${productPaginationPages}">
+                    <span class="pagination__link pagination__link--current"
+                          th:if="${pageNumber == productPage.number}"
+                          th:text="${pageNumber + 1}">1</span>
+                    <a class="pagination__link"
+                       th:if="${pageNumber != productPage.number}"
+                       th:href="@{/app/products(page=${pageNumber})}"
+                       th:text="${pageNumber + 1}">2</a>
+                </th:block>
+            </div>
+            <a class="pagination__link"
+               th:if="${!productPage.last}"
+               th:href="@{/app/products(page=${productPage.number + 1})}">Вперед</a>
+            <span class="pagination__link pagination__link--disabled" th:if="${productPage.last}">Вперед</span>
+        </nav>
         <div class="empty" th:if="${products.isEmpty()}">Добавьте первый товар, чтобы запустить прогнозирование промо акции.</div>
     </section>
 </main>

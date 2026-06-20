@@ -19,9 +19,13 @@
             <span class="badge badge--ok">Готово</span>
         </div>
 
-        <div class="quality-list">
+        <div class="empty-state" th:if="${qualityReport.visibleChecks().isEmpty()}">
+            Ошибок и необычных сигналов сейчас нет.
+        </div>
+
+        <div class="quality-list" th:if="${!qualityReport.visibleChecks().isEmpty()}">
             <div class="quality-check"
-                 th:each="check : ${qualityReport.checks}"
+                 th:each="check : ${qualityReport.visibleChecks()}"
                  th:classappend="${check.status == 'OK'} ? ' quality-check--ok' : (${check.status == 'WARN'} ? ' quality-check--warn' : ' quality-check--bad')">
                 <div>
                     <div class="quality-check__title" th:text="${check.title}">Проверка</div>

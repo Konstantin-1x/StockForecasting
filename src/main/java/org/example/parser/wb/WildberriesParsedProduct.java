@@ -12,8 +12,7 @@ public record WildberriesParsedProduct(
         Integer stockQuantity,
         BigDecimal rating,
         Integer reviewsCount,
-        String cardUrl,
-        String rawJson
+        String cardUrl
 ) {
     public BigDecimal benefitPercent() {
         if (price == null || feedbackReward == null || price.signum() == 0) {

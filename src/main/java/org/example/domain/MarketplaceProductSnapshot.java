@@ -8,7 +8,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
@@ -58,10 +57,6 @@ public class MarketplaceProductSnapshot {
 
     @Column(name = "measurement_source", length = 40)
     private String measurementSource;
-
-    @Lob
-    @Column(name = "raw_json", columnDefinition = "text")
-    private String rawJson;
 
     public Long getId() {
         return id;
@@ -139,11 +134,4 @@ public class MarketplaceProductSnapshot {
         this.measurementSource = measurementSource;
     }
 
-    public String getRawJson() {
-        return rawJson;
-    }
-
-    public void setRawJson(String rawJson) {
-        this.rawJson = rawJson;
-    }
 }

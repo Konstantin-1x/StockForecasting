@@ -174,7 +174,7 @@ public class DataTransferService {
         Map<String, Object> manifest = new LinkedHashMap<>();
         manifest.put("format", FORMAT);
         manifest.put("version", VERSION);
-        manifest.put("schema", tables.isEmpty() ? currentSchema() : tables.getFirst().schemaName());
+        manifest.put("schema", tables.isEmpty() ? currentSchema() : tables.get(0).schemaName());
         manifest.put("exportedAt", Instant.now().toString());
 
         List<Map<String, Object>> tableInfoList = new ArrayList<>();

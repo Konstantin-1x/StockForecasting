@@ -48,19 +48,10 @@ public class NeuralPromotionForecastService {
     private static final int MIN_TRAINING_SAMPLES = 24;
     private static final int MIN_SELLER_TRAINING_SAMPLES = 2;
     private static final int MIN_PRODUCT_HISTORY = 6;
-    private static final int MAX_TRAINING_SAMPLES = 2500;
     private static final double PROMOTION_PRICE_DROP_THRESHOLD = 0.97;
     private static final int HIDDEN_LAYER_1 = 40;
     private static final int HIDDEN_LAYER_2 = 20;
-    private static final int TRAINING_EPOCHS = 180;
-    private static final int BATCH_SIZE = 16;
-    private static final double LEARNING_RATE = 0.01;
-    private static final double L2_PENALTY = 0.0005;
     private static final long RANDOM_SEED = 42L;
-    private static final int SELLER_FORECAST_CATEGORY_CANDIDATE_LIMIT = 160;
-    private static final int SELLER_FORECAST_PARENT_CANDIDATE_LIMIT = 240;
-    private static final int SELLER_FORECAST_PRICE_CANDIDATE_LIMIT = 320;
-    private static final int SELLER_FORECAST_GLOBAL_CANDIDATE_LIMIT = 320;
     private static final int FORECAST_MODEL_LABEL_LIMIT = 80;
     private static final int DEFAULT_REVIEW_TARGET = 20;
     private static final double WB_REVIEW_COMMISSION_RATE = 0.20;
@@ -95,17 +86,20 @@ public class NeuralPromotionForecastService {
     private final ProductRepository productRepository;
     private final SellerRepository sellerRepository;
     private final PromotionForecastRepository forecastRepository;
+    private final NeuralForecastProperties properties;
 
     public NeuralPromotionForecastService(MarketplaceProductSnapshotRepository snapshotRepository,
                                           TrackedMarketplaceProductRepository trackedProductRepository,
                                           ProductRepository productRepository,
                                           SellerRepository sellerRepository,
-                                          PromotionForecastRepository forecastRepository) {
+                                          PromotionForecastRepository forecastRepository,
+                                          NeuralForecastProperties properties) {
         this.snapshotRepository = snapshotRepository;
         this.trackedProductRepository = trackedProductRepository;
         this.productRepository = productRepository;
         this.sellerRepository = sellerRepository;
         this.forecastRepository = forecastRepository;
+        this.properties = properties;
     }
 
     @Transactional
@@ -199,23 +193,34 @@ public class NeuralPromotionForecastService {
         forecast.setPromotionBudget(scenario.budget());
         forecast.setRecommendedDiscountAmount(null);
         forecast.setRecommendedDiscountPercent(null);
-        forecast.setConfidenceInterval(model == null ? decimal(35.0, 2) : decimal(model.metrics().confidencePercent(), 2));
-        forecast.setForecastModel(limitText(forecastModelLabel(model), FORECAST_MODEL_LABEL_LIMIT));
-        forecast.setTrainingSampleCount(model == null ? 0 : model.trainingSampleCount());
+        BigDecimal confidence = model == null ? decimal(35.0, 2) : decimal(model.metrics().confidencePercent(), 2);
+        int trainingSamples = model == null ? 0 : model.trainingSampleCount();
+        String modelLabel = limitText(forecastModelLabel(model), FORECAST_MODEL_LABEL_LIMIT);
+        forecast.setConfidenceInterval(confidence);
+        forecast.setForecastModel(modelLabel);
+        forecast.setTrainingSampleCount(trainingSamples);
         forecast.setValidationMae(model == null ? null : decimal(model.metrics().averageMae(), 4));
         forecastRepository.save(forecast);
 
         String message = String.format(
                 Locale.US,
-                "Прогноз готов: товар '%s', бюджет %s ₽, ставка за отзыв %s ₽, план отзывов %d, ожидаемый сбор %d д. Минимальный срок акции WB: %d д.",
-                sellerProduct.getName(),
-                moneyText(scenario.budget()),
-                moneyText(scenario.reviewReward()),
-                scenario.plannedReviews(),
-                scenario.collectionDays(),
-                scenario.platformCampaignDays()
+                "Прогноз готов для товара '%s'.",
+                sellerProduct.getName()
         );
-        return new NeuralForecastRunResult(1, model == null ? 0 : model.trainingSampleCount(), 1, 0, message);
+        NeuralForecastRunResult.ForecastScenarioSummary summary =
+                new NeuralForecastRunResult.ForecastScenarioSummary(
+                        sellerProduct.getName(),
+                        scenario.budget(),
+                        scenario.reviewReward(),
+                        scenario.plannedReviews(),
+                        scenario.collectionDays(),
+                        scenario.platformCampaignDays(),
+                        scenario.stockAtStart(),
+                        confidence,
+                        trainingSamples,
+                        modelLabel
+                );
+        return new NeuralForecastRunResult(1, trainingSamples, 1, 0, message, summary);
     }
 
     private NeuralForecastRunResult recalculateForecastsForTargets(Set<String> targetArticles) {
@@ -428,7 +433,7 @@ public class NeuralPromotionForecastService {
                     candidates,
                     trackedProductRepository.findByCategoryOrderByDiscoveredAtDesc(
                             category,
-                            PageRequest.of(0, SELLER_FORECAST_CATEGORY_CANDIDATE_LIMIT)
+                            PageRequest.of(0, properties.getSellerForecastCategoryCandidateLimit())
                     )
             );
 
@@ -437,7 +442,7 @@ public class NeuralPromotionForecastService {
                         candidates,
                         trackedProductRepository.findByParentCategory(
                                 category.getParentCategory(),
-                                PageRequest.of(0, SELLER_FORECAST_PARENT_CANDIDATE_LIMIT)
+                                PageRequest.of(0, properties.getSellerForecastParentCandidateLimit())
                         )
                 );
             }
@@ -447,7 +452,7 @@ public class NeuralPromotionForecastService {
         addCandidates(
                 candidates,
                 trackedProductRepository.findAllByOrderByDiscoveredAtDesc(
-                        PageRequest.of(0, SELLER_FORECAST_GLOBAL_CANDIDATE_LIMIT)
+                        PageRequest.of(0, properties.getSellerForecastGlobalCandidateLimit())
                 )
         );
         return new ArrayList<>(candidates.values());
@@ -464,7 +469,7 @@ public class NeuralPromotionForecastService {
         return trackedProductRepository.findByDiscoveredPriceBetweenOrderByDiscoveredAtDesc(
                 minPrice,
                 maxPrice,
-                PageRequest.of(0, SELLER_FORECAST_PRICE_CANDIDATE_LIMIT)
+                PageRequest.of(0, properties.getSellerForecastPriceCandidateLimit())
         );
     }
 
@@ -526,45 +531,72 @@ public class NeuralPromotionForecastService {
                                                                List<TrackedMarketplaceProduct> trackedProducts,
                                                                Map<Long, List<MarketplaceProductSnapshot>> historyByProduct,
                                                                Map<String, Optional<TrainedModel>> trainedModels) {
-        for (TrainingScope scope : trainingScopesFor(target, trackedProducts, historyByProduct)) {
-            Optional<TrainedModel> cached = trainedModels.get(scope.key());
-            if (cached != null) {
-                if (cached.isPresent()) {
-                    return cached;
-                }
-                continue;
-            }
-
-            Optional<TrainedModel> trained = trainModel(scope, historyByProduct);
-            trainedModels.put(scope.key(), trained);
-            if (trained.isPresent()) {
-                return trained;
-            }
-        }
-        return Optional.empty();
+        return resolveBestTrainedModelForTarget(
+                target,
+                trackedProducts,
+                historyByProduct,
+                trainedModels,
+                MIN_TRAINING_SAMPLES,
+                ""
+        );
     }
 
     private Optional<TrainedModel> resolveSparseTrainedModelForTarget(Product target,
                                                                      List<TrackedMarketplaceProduct> trackedProducts,
                                                                      Map<Long, List<MarketplaceProductSnapshot>> historyByProduct,
                                                                      Map<String, Optional<TrainedModel>> trainedModels) {
+        return resolveBestTrainedModelForTarget(
+                target,
+                trackedProducts,
+                historyByProduct,
+                trainedModels,
+                MIN_SELLER_TRAINING_SAMPLES,
+                "seller-sparse:"
+        );
+    }
+
+    private Optional<TrainedModel> resolveBestTrainedModelForTarget(Product target,
+                                                                   List<TrackedMarketplaceProduct> trackedProducts,
+                                                                   Map<Long, List<MarketplaceProductSnapshot>> historyByProduct,
+                                                                   Map<String, Optional<TrainedModel>> trainedModels,
+                                                                   int minTrainingSamples,
+                                                                   String cacheKeyPrefix) {
+        TrainedModel bestModel = null;
         for (TrainingScope scope : trainingScopesFor(target, trackedProducts, historyByProduct)) {
-            String sparseKey = "seller-sparse:" + scope.key();
-            Optional<TrainedModel> cached = trainedModels.get(sparseKey);
-            if (cached != null) {
-                if (cached.isPresent()) {
-                    return cached;
-                }
-                continue;
+            String cacheKey = cacheKeyPrefix + scope.key();
+            Optional<TrainedModel> trained = trainedModels.get(cacheKey);
+            if (trained == null) {
+                trained = trainModel(scope, historyByProduct, minTrainingSamples);
+                trainedModels.put(cacheKey, trained);
             }
 
-            Optional<TrainedModel> trained = trainModel(scope, historyByProduct, MIN_SELLER_TRAINING_SAMPLES);
-            trainedModels.put(sparseKey, trained);
-            if (trained.isPresent()) {
-                return trained;
+            if (trained.isPresent() && isBetterModel(trained.get(), bestModel)) {
+                bestModel = trained.get();
             }
         }
-        return Optional.empty();
+        if (bestModel != null) {
+            log.info("Neural forecast selected training scope: scope={}, samples={}, mae={}, confidence={}",
+                    bestModel.scopeLabel(),
+                    bestModel.trainingSampleCount(),
+                    bestModel.metrics().averageMae(),
+                    bestModel.metrics().confidencePercent());
+        }
+        return Optional.ofNullable(bestModel);
+    }
+
+    private static boolean isBetterModel(TrainedModel candidate, TrainedModel current) {
+        if (current == null) {
+            return true;
+        }
+        double confidenceDelta = candidate.metrics().confidencePercent() - current.metrics().confidencePercent();
+        if (Math.abs(confidenceDelta) > 0.25) {
+            return confidenceDelta > 0.0;
+        }
+        double maeDelta = candidate.metrics().averageMae() - current.metrics().averageMae();
+        if (Math.abs(maeDelta) > 0.0001) {
+            return maeDelta < 0.0;
+        }
+        return candidate.trainingSampleCount() > current.trainingSampleCount();
     }
 
     private List<TrainingScope> trainingScopesFor(TrackedMarketplaceProduct target,
@@ -630,6 +662,23 @@ public class NeuralPromotionForecastService {
             ));
         }
 
+        double basePrice = positiveDouble(target.getBasePrice());
+        if (basePrice > 0.0) {
+            double minPrice = Math.max(1.0, basePrice * 0.45);
+            double maxPrice = basePrice * 1.75;
+            String priceScopeKey = "price-band:" + Math.round(minPrice) + "-" + Math.round(maxPrice);
+            scopes.put(priceScopeKey, new TrainingScope(
+                    priceScopeKey,
+                    "price band " + moneyText(money(minPrice)) + "-" + moneyText(money(maxPrice)),
+                    productsWithHistory.stream()
+                            .filter(product -> {
+                                double price = positiveDouble(product.getDiscoveredPrice());
+                                return price >= minPrice && price <= maxPrice;
+                            })
+                            .toList()
+            ));
+        }
+
         scopes.put("all-products", new TrainingScope(
                 "all-products",
                 "все товары",
@@ -684,10 +733,10 @@ public class NeuralPromotionForecastService {
         model.fit(
                 normalizedTrainFeatures,
                 normalizedTrainTargets,
-                TRAINING_EPOCHS,
-                BATCH_SIZE,
-                LEARNING_RATE,
-                L2_PENALTY,
+                properties.getTrainingEpochs(),
+                properties.getBatchSize(),
+                properties.getLearningRate(),
+                properties.getL2Penalty(),
                 new Random(scopeSeed(scope.key()) + 7)
         );
 
@@ -741,14 +790,15 @@ public class NeuralPromotionForecastService {
         return limitTrainingSamples(samples);
     }
 
-    private static List<TrainingSample> limitTrainingSamples(List<TrainingSample> samples) {
-        if (samples.size() <= MAX_TRAINING_SAMPLES) {
+    private List<TrainingSample> limitTrainingSamples(List<TrainingSample> samples) {
+        int maxTrainingSamples = properties.getMaxTrainingSamples();
+        if (samples.size() <= maxTrainingSamples) {
             return samples;
         }
 
-        List<TrainingSample> limited = new ArrayList<>(MAX_TRAINING_SAMPLES);
-        for (int index = 0; index < MAX_TRAINING_SAMPLES; index++) {
-            int sourceIndex = (int) Math.floor((double) index * samples.size() / MAX_TRAINING_SAMPLES);
+        List<TrainingSample> limited = new ArrayList<>(maxTrainingSamples);
+        for (int index = 0; index < maxTrainingSamples; index++) {
+            int sourceIndex = (int) Math.floor((double) index * samples.size() / maxTrainingSamples);
             limited.add(samples.get(sourceIndex));
         }
         return limited;
@@ -990,7 +1040,6 @@ public class NeuralPromotionForecastService {
         double budget = Math.max(1.0, positiveDouble(promotionBudget));
 
         ReviewRateBounds bounds = reviewRateBounds(sellerProduct, basePrice);
-        double costMultiplier = reviewCostMultiplier();
         double modelReward = prediction[0] > 0.0 ? prediction[0] : estimateRewardFromHistory(analogHistory);
 
         double dailySales = estimateDailySales(analogHistory);
@@ -1005,8 +1054,7 @@ public class NeuralPromotionForecastService {
                 basePrice,
                 modelReward,
                 dailySales,
-                bounds,
-                costMultiplier
+                bounds
         );
 
         return new PromotionScenario(
@@ -1025,32 +1073,52 @@ public class NeuralPromotionForecastService {
                                           double basePrice,
                                           double modelReward,
                                           double dailySales,
-                                          ReviewRateBounds bounds,
-                                          double costMultiplier) {
+                                          ReviewRateBounds bounds) {
         int maxReviews = Math.max(1, stockAtStart);
         ReviewPlan bestPlan = null;
         double bestScore = Double.NEGATIVE_INFINITY;
+        int maxAffordableReviewsAtMinRate = Math.max(1, Math.min(
+                maxReviews,
+                (int) Math.floor(budget / Math.max(1.0, bounds.minRate()))
+        ));
 
         List<Double> candidateRewards = reviewRewardCandidates(bounds, modelReward);
         for (double candidateReward : candidateRewards) {
-            int plannedReviews = (int) Math.floor(budget / Math.max(1.0, candidateReward * costMultiplier));
+            int plannedReviews = (int) Math.floor(budget / Math.max(1.0, candidateReward));
             plannedReviews = Math.min(maxReviews, plannedReviews);
             if (plannedReviews <= 0) {
                 continue;
             }
 
             double conversion = reviewConversion(candidateReward, basePrice);
-            double expectedReviewsPerDay = Math.max(0.2, dailySales * conversion);
-            int collectionDays = (int) Math.ceil(plannedReviews / expectedReviewsPerDay);
-            collectionDays = Math.max(1, Math.min(90, collectionDays));
+            double promotionDailySales = estimatePromotionDailySales(
+                    dailySales,
+                    plannedReviews,
+                    stockAtStart,
+                    candidateReward,
+                    basePrice
+            );
+            int realizationDays = (int) Math.ceil(stockAtStart / promotionDailySales);
+            realizationDays = Math.max(1, Math.min(90, realizationDays));
 
-            double score = plannedReviews * conversion - collectionDays * 0.002;
+            double stockCoverage = plannedReviews / (double) Math.max(1, stockAtStart);
+            double reviewDepth = plannedReviews / (double) maxAffordableReviewsAtMinRate;
+            double budgetUse = Math.min(1.0, plannedReviews * candidateReward / budget);
+            double speedScore = 1.0 / realizationDays;
+            double score = stockCoverage * 2.2
+                    + reviewDepth * 2.2
+                    + budgetUse * 1.1
+                    + conversion * 0.8
+                    + speedScore
+                    - realizationDays * 0.01;
             if (bestPlan == null
                     || score > bestScore
                     || (Math.abs(score - bestScore) < 1.0e-9
-                    && candidateReward > bestPlan.reviewReward())) {
+                    && (realizationDays < bestPlan.collectionDays()
+                    || (realizationDays == bestPlan.collectionDays()
+                    && candidateReward > bestPlan.reviewReward())))) {
                 bestScore = score;
-                bestPlan = new ReviewPlan(candidateReward, plannedReviews, collectionDays);
+                bestPlan = new ReviewPlan(candidateReward, plannedReviews, realizationDays);
             }
         }
 
@@ -1058,8 +1126,29 @@ public class NeuralPromotionForecastService {
             return bestPlan;
         }
 
-        double fallbackReward = Math.max(1.0, Math.min(bounds.minRate(), budget / costMultiplier));
-        return new ReviewPlan(fallbackReward, 1, 90);
+        double fallbackReward = Math.max(1.0, Math.min(bounds.minRate(), budget));
+        int fallbackDays = Math.max(1, Math.min(90, (int) Math.ceil(stockAtStart / Math.max(1.0, dailySales))));
+        return new ReviewPlan(fallbackReward, 1, fallbackDays);
+    }
+
+    private double estimatePromotionDailySales(double baselineDailySales,
+                                               int plannedReviews,
+                                               int stockAtStart,
+                                               double reviewReward,
+                                               double basePrice) {
+        int targetWindowDays = preferredPromotionWindowDays(stockAtStart, baselineDailySales);
+        double reviewDrivenPurchasesPerDay = plannedReviews / (double) targetWindowDays;
+        double rewardLift = reviewConversion(reviewReward, basePrice);
+        double liftedBaseline = Math.max(0.0, baselineDailySales) * (1.0 + rewardLift * 1.5);
+        return Math.max(0.5, liftedBaseline + reviewDrivenPurchasesPerDay);
+    }
+
+    private int preferredPromotionWindowDays(int stockAtStart, double baselineDailySales) {
+        if (baselineDailySales > 0.0) {
+            int baselineSelloutDays = (int) Math.ceil(stockAtStart / baselineDailySales);
+            return Math.max(7, Math.min(21, baselineSelloutDays / 2));
+        }
+        return Math.max(7, Math.min(21, (int) Math.ceil(stockAtStart / 4.0)));
     }
 
     private List<Double> reviewRewardCandidates(ReviewRateBounds bounds, double modelReward) {

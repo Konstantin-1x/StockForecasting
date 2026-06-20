@@ -80,7 +80,7 @@ class DiplomaDataCollectionReliabilityTest {
             assertThat(response.statusCode()).isEqualTo(200);
             assertThat(page.total()).isEqualTo(2);
             assertThat(page.products()).hasSize(2);
-            assertThat(page.products().getFirst().feedbackReward()).isEqualByComparingTo(new BigDecimal("250"));
+            assertThat(page.products().get(0).feedbackReward()).isEqualByComparingTo(new BigDecimal("250"));
             assertThat(page.products().get(1).feedbackReward()).isEqualByComparingTo(new BigDecimal("180"));
         }
     }

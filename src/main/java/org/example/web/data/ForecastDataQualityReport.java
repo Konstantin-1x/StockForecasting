@@ -16,6 +16,13 @@ public record ForecastDataQualityReport(
         return checks.stream().anyMatch(check -> "BAD".equals(check.status()));
     }
 
+    public List<ForecastDataQualityCheck> visibleChecks() {
+        return checks.stream()
+                .filter(ForecastDataQualityCheck::visible)
+                .filter(check -> !"OK".equals(check.status()))
+                .toList();
+    }
+
     public String checkedAtLabel() {
         return checkedAt == null ? "" : VIEW_DATE_FORMATTER.format(checkedAt);
     }

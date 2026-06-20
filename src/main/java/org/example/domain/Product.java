@@ -78,6 +78,13 @@ public class Product {
         this.marketplaceArticle = marketplaceArticle;
     }
 
+    public String getMarketplaceUrl() {
+        if (marketplaceArticle == null || marketplaceArticle.isBlank()) {
+            return "";
+        }
+        return "https://www.wildberries.ru/catalog/" + marketplaceArticle.trim() + "/detail.aspx";
+    }
+
     public String getName() {
         return name;
     }

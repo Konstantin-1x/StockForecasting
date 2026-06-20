@@ -92,8 +92,7 @@ public class WildberriesResponseParser {
                 decimal(productNode, "reviewRating"),
                 integer(productNode, "feedbacks"),
                 WildberriesProductDetailUrlBuilder.cardUrl(article),
-                WildberriesProductDetailUrlBuilder.build(article),
-                json
+                WildberriesProductDetailUrlBuilder.build(article)
         );
     }
 
@@ -204,17 +203,8 @@ public class WildberriesResponseParser {
                 stock,
                 decimal(productNode, "reviewRating"),
                 integer(productNode, "feedbacks"),
-                "https://www.wildberries.ru/catalog/" + article + "/detail.aspx",
-                productRawJson(productNode)
+                "https://www.wildberries.ru/catalog/" + article + "/detail.aspx"
         ));
-    }
-
-    private String productRawJson(JsonNode productNode) {
-        try {
-            return objectMapper.writeValueAsString(productNode);
-        } catch (IOException e) {
-            return null;
-        }
     }
 
     private static BigDecimal firstProductPrice(JsonNode productNode) {

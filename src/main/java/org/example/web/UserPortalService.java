@@ -11,6 +11,8 @@ import org.example.repository.SellerRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+
 @Service
 public class UserPortalService {
 
@@ -65,7 +67,12 @@ public class UserPortalService {
     public void updateProfile(AppUser user, UserProfileForm form) {
         AppUser managedUser = userRepository.findById(user.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден."));
-        Seller seller = requireSeller(managedUser);
+        Seller seller = managedUser.getSeller();
+        if (seller == null) {
+            seller = new Seller();
+            seller.setRegistrationDate(LocalDate.now());
+            managedUser.setSeller(seller);
+        }
 
         String email = normalizeRequired(form.getEmail());
         userRepository.findByEmailIgnoreCase(email)
@@ -75,15 +82,15 @@ public class UserPortalService {
                 });
 
         String shopName = normalizeRequired(form.getShopName());
+        Long sellerId = seller.getId();
         sellerRepository.findByShopName(shopName)
-                .filter(existing -> !existing.getId().equals(seller.getId()))
+                .filter(existing -> !existing.getId().equals(sellerId))
                 .ifPresent(existing -> {
                     throw new IllegalArgumentException("Продавец с таким названием магазина уже существует.");
                 });
 
         managedUser.setDisplayName(normalizeRequired(form.getDisplayName()));
         managedUser.setEmail(email);
-        managedUser.setPhone(normalize(form.getPhone()));
 
         seller.setShopName(shopName);
         seller.setContactName(normalizeRequired(form.getContactName()));
@@ -91,9 +98,9 @@ public class UserPortalService {
         seller.setContactPhone(normalize(form.getContactPhone()));
         seller.setTaxId(normalize(form.getTaxId()));
         seller.setMarketplaceSellerId(normalize(form.getMarketplaceSellerId()));
-        seller.setNotes(normalize(form.getNotes()));
 
-        sellerRepository.save(seller);
+        Seller savedSeller = sellerRepository.save(seller);
+        managedUser.setSeller(savedSeller);
         userRepository.save(managedUser);
     }
 
@@ -101,7 +108,6 @@ public class UserPortalService {
         UserProfileForm form = new UserProfileForm();
         form.setDisplayName(user.getDisplayName());
         form.setEmail(user.getEmail());
-        form.setPhone(user.getPhone());
 
         Seller seller = user.getSeller();
         if (seller != null) {
@@ -111,7 +117,6 @@ public class UserPortalService {
             form.setContactPhone(seller.getContactPhone());
             form.setTaxId(seller.getTaxId());
             form.setMarketplaceSellerId(seller.getMarketplaceSellerId());
-            form.setNotes(seller.getNotes());
         }
         return form;
     }

@@ -39,6 +39,7 @@ async function main() {
     const publicPage = await publicContext.newPage();
     await capture(publicPage, "/", "01-start-page.png", "Стартовая страница");
     await capture(publicPage, "/login", "02-login-page.png", "Форма входа");
+    await capture(publicPage, "/register", "09-register-page.png", "Форма регистрации");
     await capture(publicPage, "/this-page-does-not-exist", "08-not-found-page.png", "Страница неправильной ссылки");
     await publicContext.close();
 
@@ -46,11 +47,17 @@ async function main() {
     const adminPage = await adminContext.newPage();
     await login(adminPage, adminUsername, adminPassword, "/admin", "администратор");
     await capture(adminPage, "/admin", "03-admin-dashboard.png", "Административная панель");
+    await capture(adminPage, "/admin/users", "12-admin-users.png", "Пользователи и создание администратора");
+    await capture(adminPage, "/admin/forecasts", "13-admin-forecasts.png", "Прогнозы администратора");
+    await capture(adminPage, "/admin/data-quality", "10-admin-data-quality.png", "Качество данных");
+    await capture(adminPage, "/admin/diagnostics", "11-admin-diagnostics.png", "Диагностика");
+    await captureCatalog(adminPage, "14-admin-offers-catalog.png", "Каталог WB с раскрытой подкатегорией");
     await adminContext.close();
 
     const sellerContext = await browser.newContext({ viewport: { width: 1440, height: 950 } });
     const sellerPage = await sellerContext.newPage();
     await login(sellerPage, sellerUsername, sellerPassword, "/app", "продавец");
+    await capture(sellerPage, "/app", "15-seller-dashboard.png", "Кабинет продавца");
     await capture(sellerPage, "/app/products", "04-seller-products.png", "Страница товаров продавца");
     await capture(sellerPage, "/app/products/new", "05-seller-product-form.png", "Форма добавления товара");
     await capture(sellerPage, "/app/forecasts", "06-seller-forecasts.png", "Страница прогнозирования");
@@ -81,10 +88,36 @@ async function main() {
     "05-seller-product-form.png",
     "06-seller-forecasts.png",
     "07-frontend-timings.png",
-    "08-not-found-page.png"
+    "08-not-found-page.png",
+    "09-register-page.png",
+    "10-admin-data-quality.png",
+    "11-admin-diagnostics.png",
+    "12-admin-users.png",
+    "13-admin-forecasts.png",
+    "14-admin-offers-catalog.png",
+    "15-seller-dashboard.png"
   ]) {
     console.log(`     ${path.join(outputDir, file)}`);
   }
+}
+
+async function captureCatalog(page, fileName, label) {
+  console.log(`[OK] Проверка страницы: ${label}`);
+  const startedAt = Date.now();
+  const response = await page.goto(`${baseUrl}/admin/offers`, { waitUntil: "networkidle", timeout: 30_000 });
+  await page.click("[data-catalog-open]");
+  const menuNode = page.locator(".catalog-modal .catalog-node:has(.catalog-submenu)").first();
+  await menuNode.hover();
+  await page.waitForTimeout(350);
+  timings.push({
+    label,
+    route: "/admin/offers#catalog-open",
+    status: response ? response.status() : null,
+    wallTimeMs: Date.now() - startedAt,
+    navigation: null
+  });
+  await page.screenshot({ path: path.join(outputDir, fileName), fullPage: true });
+  console.log(`     HTTP ${response ? response.status() : "-"}, ${Date.now() - startedAt} мс, файл: ${fileName}`);
 }
 
 async function launchBrowser(chromium) {

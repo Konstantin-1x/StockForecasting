@@ -94,13 +94,15 @@ public class ForecastDataQualityService {
                 "Связи snapshot -> товар",
                 orphanSnapshots + " битых ссылок",
                 orphanSnapshots == 0 ? "OK" : "BAD",
-                "Каждый замер обязан ссылаться на tracked_marketplace_products."
+                "Каждый замер обязан ссылаться на tracked_marketplace_products.",
+                orphanSnapshots > 0
         ));
         checks.add(new ForecastDataQualityCheck(
                 "Начальный замер",
                 productsWithoutInitialSnapshot + " товаров без стартового замера",
                 productsWithoutInitialSnapshot == 0 ? "OK" : "WARN",
-                "У каждого нового товара должен быть DISCOVERY_CATALOG или DISCOVERY_BACKFILL."
+                "У каждого нового товара должен быть DISCOVERY_CATALOG или DISCOVERY_BACKFILL.",
+                productsWithoutInitialSnapshot > 0
         ));
         checks.add(new ForecastDataQualityCheck(
                 "Глубина истории",
@@ -118,7 +120,8 @@ public class ForecastDataQualityService {
                 "Источники замеров",
                 unexpectedSources + " неизвестных источников",
                 unexpectedSources == 0 ? "OK" : "BAD",
-                "Допустимы DISCOVERY_CATALOG, DISCOVERY_BACKFILL и PRODUCT_DETAIL."
+                "Допустимы DISCOVERY_CATALOG, DISCOVERY_BACKFILL и PRODUCT_DETAIL.",
+                unexpectedSources > 0
         ));
 
         return new ForecastDataQualityReport(Instant.now(), checks);
