@@ -58,7 +58,7 @@
                         <div class="strong" th:text="${product.name}">Товар</div>
                         <div class="muted" th:if="${product.description}" th:text="${product.description}">Описание</div>
                     </td>
-                    <td th:text="${product.basePrice} + ' ₽'">0 ₽</td>
+                    <td th:text="${product.basePriceLabel}">0 ₽</td>
                     <td th:text="${product.currentStock}">0</td>
                     <td><a class="btn btn--soft btn--sm" th:href="@{/app/forecasts(productId=${product.id})}">Рассчитать</a></td>
                 </tr>

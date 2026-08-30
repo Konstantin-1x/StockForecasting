@@ -1,6 +1,7 @@
 package org.example.forecast;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public record NeuralForecastRunResult(
         int trackedProductsConsidered,
@@ -30,5 +31,16 @@ public record NeuralForecastRunResult(
             int trainingSamples,
             String modelLabel
     ) {
+        public String budgetLabel() {
+            return moneyLabel(budget);
+        }
+
+        public String reviewRewardLabel() {
+            return moneyLabel(reviewReward);
+        }
+
+        private static String moneyLabel(BigDecimal value) {
+            return value == null ? "" : value.setScale(0, RoundingMode.HALF_UP).toPlainString() + "\u00A0\u20BD";
+        }
     }
 }

@@ -58,8 +58,8 @@
                                rel="noopener">Данные</a>
                         </td>
                         <td th:text="${offer.competitorName ?: 'Не указан'}">Продавец</td>
-                        <td th:text="${offer.competitorPrice} + ' ₽'">0 ₽</td>
-                        <td th:text="${offer.feedbackReward} + ' ₽'">0 ₽</td>
+                        <td th:text="${offer.competitorPriceLabel}">0 ₽</td>
+                        <td th:text="${offer.feedbackRewardLabel}">0 ₽</td>
                         <td><span class="badge badge--ok" th:text="${offer.benefitPercent} + '%'">0%</span></td>
                         <td th:text="${offer.stockQuantity}">0</td>
                         <td class="muted" th:text="${offer.collectedAtLabel}">Дата</td>
@@ -109,7 +109,7 @@
             <div class="catalog-browser">
                 <a class="catalog-link"
                    th:classappend="${selectedCategoryKey == null} ? ' catalog-link--active'"
-                   th:href="@{/admin/offers}">Все товары</a>
+                   th:href="@{/admin/offers(categoryKey='all')}">Все товары</a>
                 <div class="catalog-menu catalog-menu--dropdown">
                     <th:block th:replace="~{catalog-fragments :: offerCatalogItems(${catalog.rootCategories})}"></th:block>
                 </div>

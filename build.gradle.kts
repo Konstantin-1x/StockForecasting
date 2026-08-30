@@ -55,7 +55,7 @@ tasks.test {
     doFirst {
         jvmArgs("-javaagent:${mockitoAgent.singleFile.absolutePath}")
         logger.lifecycle("")
-        logger.lifecycle("[REPORT] Diploma test run started.")
+        logger.lifecycle("[REPORT] Diplom test run started.")
         logger.lifecycle("[REPORT] Console output includes HTTP statuses, extracted data and checked user scenarios.")
         logger.lifecycle("")
     }

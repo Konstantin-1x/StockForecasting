@@ -13,6 +13,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -104,6 +105,10 @@ public class CompetitorOffer {
         return competitorPrice;
     }
 
+    public String getCompetitorPriceLabel() {
+        return moneyLabel(competitorPrice);
+    }
+
     public void setCompetitorPrice(BigDecimal competitorPrice) {
         this.competitorPrice = competitorPrice;
     }
@@ -112,12 +117,20 @@ public class CompetitorOffer {
         return competitorDiscount;
     }
 
+    public String getCompetitorDiscountLabel() {
+        return moneyLabel(competitorDiscount);
+    }
+
     public void setCompetitorDiscount(BigDecimal competitorDiscount) {
         this.competitorDiscount = competitorDiscount;
     }
 
     public BigDecimal getFeedbackReward() {
         return feedbackReward;
+    }
+
+    public String getFeedbackRewardLabel() {
+        return moneyLabel(feedbackReward);
     }
 
     public void setFeedbackReward(BigDecimal feedbackReward) {
@@ -166,5 +179,9 @@ public class CompetitorOffer {
 
     public String getCollectedAtLabel() {
         return collectedAt == null ? "" : VIEW_DATE_FORMATTER.format(collectedAt);
+    }
+
+    private static String moneyLabel(BigDecimal value) {
+        return value == null ? "" : value.setScale(0, RoundingMode.HALF_UP).toPlainString() + "\u00A0\u20BD";
     }
 }

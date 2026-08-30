@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout('Диагностика', 'diagnostics', ~{::main})}">
+<main>
+    <section class="page-head">
+        <div>
+            <h1>Диагностика</h1>
+            <p>Сводка состояния сбора данных Wildberries, cookie-наборов, proxy и сохраненных временных рядов.</p>
+        </div>
+        <a class="btn btn--soft" th:href="@{/api/parser/wildberries/diagnostics}" target="_blank" rel="noopener">Открыть JSON</a>
+    </section>
+
+    <section class="grid grid--4">
+        <div class="card metric">
+            <div class="metric__label">Cookie-наборов</div>
+            <div class="metric__value" th:text="${diagnostics['cookieSets']}">0</div>
+        </div>
+        <div class="card metric">
+            <div class="metric__label">Proxy доступно</div>
+            <div class="metric__value" th:text="${diagnostics['proxiesAvailable']}">0</div>
+        </div>
+        <div class="card metric">
+            <div class="metric__label">Активных товаров</div>
+            <div class="metric__value" th:text="${diagnostics['activeTrackedProducts']}">0</div>
+        </div>
+        <div class="card metric">
+            <div class="metric__label">Снимков товаров</div>
+            <div class="metric__value" th:text="${diagnostics['productSnapshots']}">0</div>
+        </div>
+    </section>
+
+    <section class="card table-card" style="margin-top: 18px;">
+        <div class="table-toolbar">
+            <div>
+                <div class="table-toolbar__title">Сигналы, требующие внимания</div>
+                <div class="table-toolbar__hint">Нормальные нулевые счетчики скрыты, полный JSON доступен по кнопке выше.</div>
+            </div>
+        </div>
+        <div class="empty-state" th:if="${#maps.isEmpty(diagnosticAlerts)}">
+            Критичных или необычных диагностических сигналов сейчас нет.
+        </div>
+        <div class="diagnostics-list" th:if="${!#maps.isEmpty(diagnosticAlerts)}">
+            <div class="diagnostics-row" th:each="item : ${diagnosticAlerts}">
+                <span th:text="${item.key}">key</span>
+                <strong th:text="${item.value}">value</strong>
+            </div>
+        </div>
+    </section>
+
+    <section class="grid grid--2 admin-grid" style="margin-top: 18px;">
+        <div class="card action-card">
+            <div class="action-card__head">
+                <div>
+                    <h2>Сбор данных</h2>
+                    <p>Управление фоновым сбором вынесено в диагностику, чтобы главная админ-панель оставалась обзорной.</p>
+                </div>
+                <span class="badge"
+                      th:if="${dataCollectionStatus != null}"
+                      th:classappend="${dataCollectionStatus.enabled()} ? ' badge--ok' : ' badge--warn'"
+                      th:text="${dataCollectionStatus.enabled()} ? 'Сбор включен' : 'Сбор остановлен'">Сбор остановлен</span>
+            </div>
+            <div class="action-card__actions">
+                <form class="inline-action-form"
+                      th:if="${dataCollectionStatus == null || !dataCollectionStatus.enabled()}"
+                      th:action="@{/admin/data-collection/start}" method="post">
+                    <input th:if="${_csrf != null}" type="hidden"
+                           th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button class="btn" type="submit">Запустить сбор данных</button>
+                </form>
+                <form class="inline-action-form"
+                      th:if="${dataCollectionStatus != null && dataCollectionStatus.enabled()}"
+                      th:action="@{/admin/data-collection/stop}" method="post">
+                    <input th:if="${_csrf != null}" type="hidden"
+                           th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button class="btn btn--soft" type="submit">Остановить сбор данных</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card action-card">
+            <div class="action-card__head">
+                <div>
+                    <h2>Импорт и экспорт базы</h2>
+                    <p>Полный перенос рабочей базы, включая пользователей, товары, временные ряды и прогнозы.</p>
+                </div>
+                <span class="badge badge--ok">Полная БД</span>
+            </div>
+            <div class="action-card__actions">
+                <a class="btn" th:href="@{/admin/data/export}">Скачать полный экспорт</a>
+            </div>
+            <form class="import-form" th:action="@{/admin/data/import}" method="post" enctype="multipart/form-data">
+                <input th:if="${_csrf != null}" type="hidden"
+                       th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <label class="field-label" for="dataArchive">Архив экспорта</label>
+                <input class="file-input" id="dataArchive" type="file" name="file" accept=".zip,application/zip" required>
+                <label class="checkbox-line">
+                    <input type="checkbox" name="confirmReplace" value="true" required>
+                    <span>Я понимаю, что импорт полностью заменит локальную базу данными из архива.</span>
+                </label>
+                <button class="btn btn--soft" type="submit">Загрузить полный импорт</button>
+            </form>
+        </div>
+    </section>
+</main>
+</html>

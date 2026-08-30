@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Entity
 @Table(
@@ -105,6 +106,10 @@ public class Product {
         return basePrice;
     }
 
+    public String getBasePriceLabel() {
+        return moneyLabel(basePrice);
+    }
+
     public void setBasePrice(BigDecimal basePrice) {
         this.basePrice = basePrice;
     }
@@ -115,5 +120,9 @@ public class Product {
 
     public void setCurrentStock(Integer currentStock) {
         this.currentStock = currentStock;
+    }
+
+    private static String moneyLabel(BigDecimal value) {
+        return value == null ? "" : value.setScale(0, RoundingMode.HALF_UP).toPlainString() + "\u00A0\u20BD";
     }
 }

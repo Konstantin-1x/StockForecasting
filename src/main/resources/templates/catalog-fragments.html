@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="offerCatalogItems(items)">
+    <div class="catalog-node"
+         th:each="category : ${items}"
+         th:classappend="${category.selected || category.activeTrail} ? ' catalog-node--active'">
+        <a class="catalog-link"
+           th:href="@{/admin/offers(categoryKey=${category.key})}"
+           th:classappend="${category.selected || category.activeTrail} ? ' catalog-link--active'">
+            <span th:text="${category.name}">Категория</span>
+            <span class="catalog-link__arrow" th:if="${category.hasChildren}">›</span>
+        </a>
+        <div class="catalog-submenu" th:if="${category.hasChildren}">
+            <th:block th:replace="~{catalog-fragments :: offerCatalogItems(${category.children})}"></th:block>
+        </div>
+    </div>
+</th:block>
+
+<th:block th:fragment="productCatalogItems(items)">
+    <div class="catalog-node"
+         th:each="category : ${items}"
+         th:classappend="${category.selected || category.activeTrail} ? ' catalog-node--active'">
+        <a class="catalog-link"
+           th:href="@{/app/products/new(categoryKey=${category.key})}"
+           th:classappend="${category.selected || category.activeTrail} ? ' catalog-link--active'">
+            <span th:text="${category.name}">Категория</span>
+            <span class="catalog-link__arrow" th:if="${category.hasChildren}">›</span>
+        </a>
+        <div class="catalog-submenu" th:if="${category.hasChildren}">
+            <th:block th:replace="~{catalog-fragments :: productCatalogItems(${category.children})}"></th:block>
+        </div>
+    </div>
+</th:block>
+</body>
+</html>

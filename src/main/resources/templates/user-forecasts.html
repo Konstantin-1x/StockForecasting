@@ -20,10 +20,10 @@
                     <strong th:text="${forecastScenario.productName()}">Товар</strong>
                 </div>
                 <div class="forecast-kpis">
-                    <div><span>Ставка за отзыв</span><strong th:text="${forecastScenario.reviewReward()} + ' ₽'">0 ₽</strong></div>
+                    <div><span>Ставка за отзыв</span><strong th:text="${forecastScenario.reviewRewardLabel()}">0 ₽</strong></div>
                     <div><span>План отзывов</span><strong th:text="${forecastScenario.plannedReviews()}">0</strong></div>
                     <div><span>Срок реализации</span><strong th:text="${forecastScenario.collectionDays()} + ' д.'">0 д.</strong></div>
-                    <div><span>Бюджет</span><strong th:text="${forecastScenario.budget()} + ' ₽'">0 ₽</strong></div>
+                    <div><span>Бюджет</span><strong th:text="${forecastScenario.budgetLabel()}">0 ₽</strong></div>
                 </div>
                 <div class="forecast-summary__footer">
                     <span>Уверенность модели: <strong th:text="${forecastScenario.confidencePercent()} + '%'">0%</strong></span>

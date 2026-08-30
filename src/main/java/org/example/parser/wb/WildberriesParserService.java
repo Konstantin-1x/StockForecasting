@@ -115,7 +115,7 @@ public class WildberriesParserService {
     private ProductCategory saveCategory(WildberriesCategoryRef categoryRef) {
         ProductCategory category = categoryRepository.findByExternalUrl(categoryRef.categoryUrl())
                 .orElseGet(ProductCategory::new);
-        category.setName(categoryRef.name());
+        category.setName(WildberriesCategoryNameTranslator.toRussian(categoryRef.name()));
         category.setExternalUrl(categoryRef.categoryUrl());
         category.setWbShardKey(categoryRef.shardKey());
         category.setWbQuery(categoryRef.query());

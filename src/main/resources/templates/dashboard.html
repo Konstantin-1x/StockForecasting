@@ -62,8 +62,8 @@
                         <a th:href="${offer.cardUrl}" target="_blank" th:text="${offer.productName}">Товар</a>
                         <div class="muted" th:text="${offer.competitorName}">Магазин</div>
                     </td>
-                    <td th:text="${offer.competitorPrice} + ' ₽'">0 ₽</td>
-                    <td th:text="${offer.feedbackReward} + ' ₽'">0 ₽</td>
+                    <td th:text="${offer.competitorPriceLabel}">0 ₽</td>
+                    <td th:text="${offer.feedbackRewardLabel}">0 ₽</td>
                     <td><span class="badge badge--ok" th:text="${offer.benefitPercent} + '%'">0%</span></td>
                     <td th:text="${offer.stockQuantity}">0</td>
                 </tr>

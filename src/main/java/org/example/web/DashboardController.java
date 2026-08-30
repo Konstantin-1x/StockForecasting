@@ -35,6 +35,9 @@ import java.util.stream.IntStream;
 public class DashboardController {
 
     private static final int ADMIN_FORECAST_PAGE_SIZE = 20;
+    private static final String ALL_OFFERS_CATEGORY_KEY = "all";
+    private static final String DEFAULT_OFFERS_CATEGORY_KEY =
+            "https://www.wildberries.ru/promotions/rubli-za-otzyvy/budushchie-mamy";
 
     private final SellerRepository sellerRepository;
     private final ProductRepository productRepository;
@@ -145,15 +148,25 @@ public class DashboardController {
         );
 
         Page<CompetitorOffer> offerPage;
-        String categoryUrlPrefix = categoryCatalogService.selectedCategoryUrlPrefix(categoryKey);
-        if (categoryUrlPrefix == null) {
+        boolean allOffersRequested = categoryKey != null
+                && ALL_OFFERS_CATEGORY_KEY.equalsIgnoreCase(categoryKey.trim());
+        String requestedCategoryKey = categoryKey == null || categoryKey.isBlank()
+                ? DEFAULT_OFFERS_CATEGORY_KEY
+                : categoryKey;
+        String selectedCategoryKey = allOffersRequested
+                ? null
+                : categoryCatalogService.selectedCategoryUrlPrefix(requestedCategoryKey);
+        List<Long> selectedCategoryIds = selectedCategoryKey == null
+                ? List.of()
+                : categoryCatalogService.selectedCategoryIds(selectedCategoryKey);
+        if (selectedCategoryIds.isEmpty()) {
             offerPage = offerRepository.findAll(pageRequest);
         } else {
-            offerPage = offerRepository.findByCategoryUrlPrefix(categoryUrlPrefix, pageRequest);
+            offerPage = offerRepository.findByCategoryIdIn(selectedCategoryIds, pageRequest);
         }
 
-        model.addAttribute("catalog", categoryCatalogService.buildCatalog(categoryUrlPrefix));
-        model.addAttribute("selectedCategoryKey", categoryUrlPrefix);
+        model.addAttribute("catalog", categoryCatalogService.buildCatalog(selectedCategoryKey));
+        model.addAttribute("selectedCategoryKey", selectedCategoryKey);
         model.addAttribute("offerPage", offerPage);
         model.addAttribute("offers", offerPage.getContent());
         model.addAttribute("paginationPages", pageNumbers(offerPage));

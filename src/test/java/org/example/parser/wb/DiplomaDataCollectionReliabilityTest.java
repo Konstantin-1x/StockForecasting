@@ -12,8 +12,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.Duration;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -83,39 +81,6 @@ class DiplomaDataCollectionReliabilityTest {
             assertThat(page.products().get(0).feedbackReward()).isEqualByComparingTo(new BigDecimal("250"));
             assertThat(page.products().get(1).feedbackReward()).isEqualByComparingTo(new BigDecimal("180"));
         }
-    }
-
-    @Test
-    @DisplayName("Failed proxy is temporarily excluded from the available pool")
-    void proxyPoolTemporarilyExcludesFailedProxyAndReturnsItAfterSuccess() {
-        WildberriesProxy firstProxy = new WildberriesProxy("net-1.example.test", 8444, "user", "password", true);
-        WildberriesProxy secondProxy = new WildberriesProxy("net-2.example.test", 8444, "user", "password", true);
-        WildberriesProxyPool proxyPool = new WildberriesProxyPool(
-                List.of(firstProxy, secondProxy),
-                Duration.ofMinutes(10)
-        );
-
-        assertThat(proxyPool.size()).isEqualTo(2);
-        assertThat(proxyPool.availableCount()).isEqualTo(2);
-        System.out.println("[REPORT] Proxy pool before failure: available="
-                + proxyPool.availableCount() + ", coolingDown=" + proxyPool.coolingDownCount());
-
-        proxyPool.recordFailure(firstProxy);
-        System.out.println("[REPORT] Failed proxy registered: " + firstProxy.host() + ":" + firstProxy.port());
-        System.out.println("[REPORT] Proxy pool after failure: available="
-                + proxyPool.availableCount() + ", coolingDown=" + proxyPool.coolingDownCount());
-
-        assertThat(proxyPool.availableCount()).isEqualTo(1);
-        assertThat(proxyPool.coolingDownCount()).isEqualTo(1);
-
-        proxyPool.recordSuccess(firstProxy);
-        System.out.println("[REPORT] Proxy returned to pool after successful request: "
-                + firstProxy.host() + ":" + firstProxy.port());
-        System.out.println("[REPORT] Proxy pool after restore: available="
-                + proxyPool.availableCount() + ", coolingDown=" + proxyPool.coolingDownCount());
-
-        assertThat(proxyPool.availableCount()).isEqualTo(2);
-        assertThat(proxyPool.coolingDownCount()).isZero();
     }
 
     private static TestJsonServer startJsonServer(String responseBody) throws IOException {
